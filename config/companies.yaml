@@ -1,0 +1,91 @@
+# ============================================================================
+# TARGET COMPANY REGISTRY
+# ----------------------------------------------------------------------------
+# This is the most valuable file in the repo. It is the list of companies whose
+# careers pages you watch directly — the roles that never reach LinkedIn or
+# Naukri. Getting this to 40-60 entries is the single highest-ROI hour of work
+# in Phase 0.
+#
+# HOW TO ADD A COMPANY
+#   1. Open the company's careers page and click any job.
+#   2. Copy the URL you land on.
+#   3. Run:  pnpm cli detect "<that url>"
+#   4. Paste the reported ats + token here.
+#   5. Run:  pnpm cli verify     (checks every entry actually returns jobs)
+#
+# FIELDS
+#   name       Display name.
+#   ats        greenhouse | lever | ashby | workday | smartrecruiters
+#   token      Board token from `detect`.
+#   signal     Optional reputation nudge, -5..+5. Reserved for scoring.
+#   tags       Free-form. Useful ones: india, remote-india, remote-global, product, fintech
+#   enabled    Set false to keep an entry on file without fetching it.
+# ============================================================================
+
+companies:
+  # --- verified working as of 2026-08-24 ---
+  - name: Stripe
+    ats: greenhouse
+    token: stripe
+    careersUrl: https://stripe.com/jobs/search
+    signal: 4
+    tags: [product, fintech, remote-global]
+
+  - name: Postman
+    ats: greenhouse
+    token: postman
+    careersUrl: https://www.postman.com/company/careers/
+    signal: 3
+    tags: [india, product, remote-india]
+
+  - name: Grafana Labs
+    ats: greenhouse
+    token: grafanalabs
+    careersUrl: https://grafana.com/about/careers/
+    signal: 3
+    tags: [remote-global, product, oss]
+
+  - name: OpenAI
+    ats: ashby
+    token: openai
+    careersUrl: https://openai.com/careers/
+    signal: 5
+    tags: [product, ai]
+
+  - name: Palantir
+    ats: lever
+    token: palantir
+    careersUrl: https://www.palantir.com/careers/
+    signal: 3
+    tags: [product]
+
+  - name: Vercel
+    ats: ashby
+    token: vercel
+    careersUrl: https://vercel.com/careers
+    signal: 4
+    tags: [remote-global, product, frontend]
+
+  # --- candidates: verify these on your machine with `pnpm cli verify` ---
+  # Tokens below are UNVERIFIED guesses. `verify` will tell you which resolve.
+  # Delete the ones that fail; that takes 30 seconds and leaves you a clean list.
+  - { name: Razorpay,   ats: lever,      token: razorpay,   enabled: false, tags: [india, fintech] }
+  - { name: Zerodha,    ats: greenhouse, token: zerodha,    enabled: false, tags: [india, fintech] }
+  - { name: Freshworks, ats: greenhouse, token: freshworks, enabled: false, tags: [india, chennai, product] }
+  - { name: Chargebee,  ats: lever,      token: chargebee,  enabled: false, tags: [india, chennai, saas] }
+  - { name: Zoho,       ats: unknown,    token: zoho,       enabled: false, tags: [india, chennai] }
+  - { name: Hasura,     ats: lever,      token: hasura,     enabled: false, tags: [india, remote-india] }
+  - { name: Atlan,      ats: lever,      token: atlan,      enabled: false, tags: [india, remote-india] }
+  - { name: Zeta,       ats: lever,      token: zeta,       enabled: false, tags: [india, fintech] }
+  - { name: CRED,       ats: lever,      token: cred,       enabled: false, tags: [india, fintech] }
+  - { name: Groww,      ats: lever,      token: groww,      enabled: false, tags: [india, fintech] }
+  - { name: Netlify,    ats: greenhouse, token: netlify,    enabled: false, tags: [remote-global, frontend] }
+  - { name: Linear,     ats: ashby,      token: linear,     enabled: false, tags: [remote-global, product] }
+  - { name: Ramp,       ats: ashby,      token: ramp,       enabled: false, tags: [fintech] }
+  - { name: Deel,       ats: ashby,      token: deel,       enabled: false, tags: [remote-global] }
+  - { name: GitLab,     ats: greenhouse, token: gitlab,     enabled: false, tags: [remote-global, oss] }
+  - { name: Sentry,     ats: greenhouse, token: sentry,     enabled: false, tags: [remote-global, oss] }
+  - { name: Twilio,     ats: greenhouse, token: twilio,     enabled: false, tags: [remote-global] }
+  - { name: Cloudflare, ats: greenhouse, token: cloudflare, enabled: false, tags: [remote-global] }
+  - { name: DigitalOcean, ats: greenhouse, token: digitalocean, enabled: false, tags: [remote-global] }
+  - { name: Automattic, ats: greenhouse, token: automattic, enabled: false, tags: [remote-global] }

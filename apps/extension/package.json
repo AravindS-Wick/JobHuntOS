@@ -1,0 +1,7 @@
+{
+  "name": "@jobhunt/extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "JobHunt OS Manifest V3 Chrome Extension Copilot",
+  "type": "module"
+}

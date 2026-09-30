@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: jobhunt-postgres
+    environment:
+      POSTGRES_USER: jobhunt
+      POSTGRES_PASSWORD: jobhunt
+      POSTGRES_DB: jobhunt
+    ports: ["5433:5432"]
+    volumes: ["jobhunt-pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobhunt"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: jobhunt-redis
+    ports: ["6380:6379"]
+    volumes: ["jobhunt-redisdata:/data"]
+
+volumes:
+  jobhunt-pgdata:
+  jobhunt-redisdata:
