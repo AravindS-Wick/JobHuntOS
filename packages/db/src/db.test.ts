@@ -146,3 +146,14 @@ describe('inbox repo', () => {
   });
 });
 
+
+describe('migrations', () => {
+  it('every .sql migration is listed in the drizzle journal (db:migrate would skip it otherwise)', async () => {
+    const { readdirSync, readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const dir = resolve(process.cwd(), 'packages/db/migrations');
+    const sqlTags = readdirSync(dir).filter((f) => f.endsWith('.sql')).map((f) => f.replace(/\.sql$/, '')).sort();
+    const journal = JSON.parse(readFileSync(resolve(dir, 'meta/_journal.json'), 'utf8')) as { entries: { tag: string }[] };
+    expect(journal.entries.map((e) => e.tag).sort()).toEqual(sqlTags);
+  });
+});

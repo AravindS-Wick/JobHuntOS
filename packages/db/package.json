@@ -1,5 +1,5 @@
 {
   "name": "@jobhunt/db", "version": "0.1.0", "private": true, "type": "module",
   "main": "src/index.ts",
-  "dependencies": { "@jobhunt/core": "workspace:*", "drizzle-orm": "^0.38.3", "postgres": "^3.4.5" }
+  "dependencies": { "@jobhunt/core": "workspace:*", "drizzle-orm": "^0.45.2", "postgres": "^3.4.5" }
 }
