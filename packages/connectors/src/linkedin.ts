@@ -121,10 +121,11 @@ export async function fetchLinkedInJobs(opts: LinkedInSearchOptions): Promise<Ra
   // 1. If Apify token is provided, attempt Apify actor run
   if (apifyToken) {
     try {
-      const apifyUrl = `https://api.apify.com/v2/acts/curious_coder~linkedin-jobs-scraper/run-sync-get-dataset-items?token=${apifyToken}`;
+      const apifyUrl = `https://api.apify.com/v2/acts/curious_coder~linkedin-jobs-scraper/run-sync-get-dataset-items`;
       const apifyRes = await safeFetchJson<unknown[]>(apifyUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        // Token goes in a header, never the URL, so it can't leak into logs or error messages.
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apifyToken}` },
         body: JSON.stringify({
           queries: [`${query} in ${location}`],
           maxItems: limit,
@@ -135,7 +136,7 @@ export async function fetchLinkedInJobs(opts: LinkedInSearchOptions): Promise<Ra
         if (parsed.length > 0) return parsed;
       }
     } catch (e) {
-      console.warn('LinkedIn Apify fetch failed, falling back to direct search:', e);
+      console.warn('LinkedIn Apify fetch failed, falling back to direct search:', e instanceof Error ? e.message : 'unknown error');
     }
   }
 
