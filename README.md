@@ -1,7 +1,7 @@
 # JobHunt OS
 
-[![CI](https://github.com/aravindhan/jobhunt-os/actions/workflows/ci.yml/badge.svg)](https://github.com/aravindhan/jobhunt-os/actions/workflows/ci.yml)
-[![Tests: 121 passed](https://img.shields.io/badge/tests-121%20passed-10b981.svg)](https://github.com/aravindhan/jobhunt-os)
+[![CI](https://github.com/AravindS-Wick/JobHuntOS/actions/workflows/ci.yml/badge.svg)](https://github.com/AravindS-Wick/JobHuntOS/actions/workflows/ci.yml)
+[![Tests: 251 passed](https://img.shields.io/badge/tests-251%20passed-10b981.svg)](https://github.com/AravindS-Wick/JobHuntOS)
 [![TypeScript: Strict](https://img.shields.io/badge/typescript-strict%205.7-3178c6.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
@@ -45,13 +45,16 @@ The point is not volume. The public job market converts at ~0.4% per cold applic
 
 ```
 apps/
-  api/               Fastify + Zod + OpenAPI (22 operations, audit logs, rate governor)
+  api/               Fastify + Zod + OpenAPI (64 operations, audit logs, rate governor)
   cli/               ingest · score · digest · detect · verify · demo · registry:sync
   extension/         Chrome Manifest V3 Copilot: DOM scraper & residential Easy Apply
+  worker/            Local Playwright worker: browser-only searches, submits approved applications, Human Gate
   web/               React 19 Decision Cockpit: Kanban, Outreach Studio, Synthesis
 packages/
   core/              Types, candidate PROFILE, normalisation, scoring, dedup — zero IO
-  connectors/        Greenhouse, Lever, Ashby, ATS detection, Gmail sync — pure parsers
+  connectors/        14 job sources + 6 ATS types (Greenhouse, Lever, Ashby, Workday, SmartRecruiters,
+                     Zoho Recruit), ATS detection, Gmail — pure parsers + thin fetchers
+  documents/         Resume text extraction (PDF/DOCX) and ATS-safe DOCX/PDF rendering
   contracts/         Zod schemas = API contracts; exports schema and static TypeScript type
   db/                Drizzle schema, migrations, repositories, WASM PGlite test harness
   services/          Ingest, rescore, profile overrides, registry-sync, inbox triage
@@ -75,12 +78,48 @@ pnpm cli demo
 # Check which boards in config/companies.yaml resolve
 pnpm cli verify
 
-# Run unit and integration tests (121 tests pass via in-memory WASM Postgres)
+# Run unit and integration tests (251 tests via in-memory WASM Postgres)
 pnpm test
 
 # Verify type safety across the entire repository
 pnpm typecheck
 ```
+
+---
+
+## Apply engine — find, tailor, approve, submit
+
+No Docker needed. Three terminals:
+
+```bash
+DATABASE_URL=pglite pnpm api      # 1. API on :4000 (persistent embedded Postgres in .data/)
+pnpm web                          # 2. console on :3000 → "Apply Pipeline" tab
+pnpm worker:login                 # 3. once: log in to LinkedIn, Naukri, Indeed… in the worker's Chrome profile
+pnpm worker                       #    then leave this running: it searches and submits
+```
+
+In the console:
+
+1. **Resume** — upload your PDF/DOCX. Check the parse; fix anything wrong. This is the only source tailoring may use.
+2. **Job sources** — keywords, locations, boards → *Search job boards now*. Company careers pages poll from `config/companies.yaml`.
+3. **Review & approve** — *Prepare top 20*: per job, a tailored PDF + DOCX (reordered, never embellished, truth-checked), a cover letter for Tier 1, and form answers resolved from your facts. Answer anything it won't guess, tick, **Approve**.
+4. **Human Gate** — CAPTCHAs, logins and unknown questions pause here with a screenshot; the worker waits on the page while you clear it.
+
+Approved applications are spaced 45–180 s apart, only 08:00–23:00 IST, within daily caps (LinkedIn 12, Naukri 30, company ATS 15 combined, …).
+
+| Source | How | Apply automation |
+|---|---|---|
+| Greenhouse, Lever, Ashby | Public API | ✅ Verified live (`pnpm worker:smoke`) |
+| Workday (Nvidia, Salesforce, Adobe, PayPal, Mastercard…) | Public API | Beta — needs a per-company account (Human Gate) |
+| SmartRecruiters (Bosch, Freshworks…), Zoho Recruit | Public API | Beta / manual |
+| LinkedIn | Guest search API | Beta — Easy Apply in your browser, untested without your login |
+| Naukri, Indeed | Your browser (they block direct requests) | Beta — untested without your login |
+| Glassdoor, Wellfound, Cutshort | Your browser | Search ✅; apply beta. Glassdoor search is intermittent |
+| Instahyre, Foundit, YC | Public API | Beta |
+| Google, Microsoft, Amazon careers | Public API | Manual — tailored resume generated, you submit |
+| HN Who is hiring, RemoteOK | Public API | Manual (email / external link) |
+
+**Environment** (all optional): `DATABASE_URL` (`pglite` or a Postgres URL) · `JOBHUNT_DATA_DIR` (uploads, PDFs, screenshots; default `.data`) · `JOBHUNT_API_URL` (worker → API) · `JOBHUNT_BROWSER_PROFILE` (default `~/.jobhunt/chrome-profile`) · `API_KEY` (required off localhost; set the same value as `VITE_API_KEY` for the console).
 
 ---
 

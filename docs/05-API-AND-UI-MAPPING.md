@@ -8,7 +8,7 @@
 
 ## Endpoint surface
 
-22 operations across 18 paths.
+64 operations across 56 paths. The apply engine (resumes, applications, agent, boards) is described in [06-APPLY-ENGINE.md](06-APPLY-ENGINE.md).
 
 ### health
 | Method | Path | Notes |
@@ -55,6 +55,46 @@
 |---|---|---|
 | GET | `/stats` | One call for the dashboard header |
 | GET | `/events` | Audit log, newest first |
+
+### resumes
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/resumes` | Upload PDF/DOCX/TXT/JSON Resume (base64). First upload becomes the master. |
+| GET | `/resumes`, `/resumes/master` | `readiness.missing` lists what the parse couldn't find |
+| PUT | `/resumes/:id/doc` | Correct the parse. What you save is the truth source. |
+| POST | `/resumes/:id/master` | Switch master |
+
+### applications — prepare → approve → submitted
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/applications/prepare` | `jobIds` or `auto: { tiers, limit }`. Tailors, truth-checks, renders DOCX+PDF, pre-answers forms. Submits nothing. |
+| GET | `/applications` | Review queue: job + gaps, resume changes, truth check, every form answer with its reason |
+| POST | `/applications/approve` | Batch approve. Schedules through the rate governor and queues worker tasks. |
+| POST | `/applications/skip` | |
+| POST | `/applications/:id/answer` | Answer a question the system won't guess; `saveAsFact` remembers it |
+| POST | `/applications/:id/submitted` | Record a manual application |
+| GET | `/applications/usage` | Today's submissions vs daily caps |
+| GET | `/applications/:id/resume.pdf` · `.docx` | Tailored files |
+
+### agent — the local browser worker and the Human Gate
+| Method | Path | Notes |
+|---|---|---|
+| POST | `/agent/claim` | Worker claims the next due task (apply or scrape) with everything it needs |
+| POST | `/agent/tasks/:id/report` | `submitted` · `scraped` · `needs_human` · `failed` |
+| GET | `/agent/tasks?status=needs_human` | The Human Gate queue |
+| POST | `/agent/tasks/:id/resume` | Human cleared the gate (optionally answering + saving a fact) |
+| POST | `/agent/tasks/:id/continue` | Worker takes the task back without reopening the page |
+| GET | `/agent/tasks/:id`, `/agent/screenshots/*` | |
+
+### boards — job boards and big-company careers sites
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/boards` | 14 sources and whether each is `direct` or `browser` |
+| GET/PUT | `/boards/config` | Keywords, locations, boards, results per search |
+| POST | `/boards/run` | Fetch direct boards now; queue browser-only ones for the worker |
+
+### facts, outreach, inbox, connectors
+`/facts` (list, upsert, `/facts/resolve`), `/outreach/{templates,generate,send}`, `/inbox/*` and `/connectors/*` are documented in Swagger at `/docs`.
 
 ---
 
@@ -117,10 +157,11 @@ Your `unified_job_search_platform.html` has eight tabs. Here's what each can act
 | **Jobs / Opportunity Match Feed** | ✅ **Live now** | `GET /jobs` with filters, `GET /jobs/:id`, `PATCH /jobs/:id/status`, `POST /jobs/status` |
 | **Settings / profile tuning** | ✅ **Live now** (no tab yet — add one) | `GET /profile`, `PUT /profile/overrides`, `POST /profile/rescore` |
 | **Company registry** | ✅ **Live now** (no tab yet — add one) | `GET/POST/PATCH/DELETE /companies`, `POST /companies/detect`, `POST /companies/verify` |
-| **Synthesizer** (resume + cover letter) | ⏳ Phase 1 | Not built. Will be `POST /jobs/:id/tailor` → DOCX + PDF. |
+| **Apply Pipeline** (new) | ✅ **Live now** | `/resumes`, `/boards`, `/applications`, `/agent` — the real end-to-end flow; never shows demo data |
+| **Synthesizer** (resume + cover letter) | ✅ via Apply Pipeline | Tailoring runs in `POST /applications/prepare` → DOCX + PDF |
 | **Outreach Studio** | ⏳ Phase 4 | Not built. Draft-and-approve only. |
 | **Inbox** | ⏳ Phase 4 | Not built. Gmail via Pub/Sub push. |
-| **Extension Runner** | ⏳ Phase 3 | Not built. Will include the **Human Gate** queue. |
+| **Extension Runner** | ✅ via Apply Pipeline | The **Human Gate** tab is live (`/agent/tasks?status=needs_human`) |
 | **API Code / Figma tabs** | ❌ Drop | Architecture diagrams and build valuation inside the product UI are documentation, not features. They belong in `docs/`. |
 
 ### Things in the mockup that shouldn't ship
