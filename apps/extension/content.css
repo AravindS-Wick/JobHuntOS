@@ -1,0 +1,139 @@
+/* JobHunt OS — Floating Action Dock Styles */
+#jobhunt-floating-dock {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 320px;
+  background: #070a12;
+  border: 1px solid #1e293b;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(99, 102, 241, 0.15);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #f1f5f9;
+  z-index: 999999;
+  overflow: hidden;
+  animation: jhSlideUp 0.3s ease-out;
+}
+
+@keyframes jhSlideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.jh-dock-header {
+  padding: 12px 16px;
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.jh-dock-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.jh-dock-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.jh-dock-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.4);
+}
+
+.jh-dock-close {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.jh-dock-close:hover {
+  color: #fff;
+}
+
+.jh-dock-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.jh-dock-sub {
+  margin: 0;
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.jh-dock-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jh-btn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.jh-btn-primary {
+  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  color: #fff;
+}
+
+.jh-btn-primary:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+}
+
+.jh-btn-secondary {
+  background: #1e293b;
+  color: #f1f5f9;
+  border: 1px solid #334155;
+}
+
+.jh-btn-secondary:hover {
+  background: #334155;
+  border-color: #6366f1;
+}
+
+.jh-status {
+  font-size: 11px;
+  color: #38bdf8;
+  font-family: monospace;
+  min-height: 14px;
+  line-height: 1.4;
+}
