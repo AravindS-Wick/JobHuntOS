@@ -25,7 +25,11 @@
     "db:generate": "drizzle-kit generate --config=packages/db/drizzle.config.ts",
     "db:studio": "drizzle-kit studio --config=packages/db/drizzle.config.ts",
     "registry:sync": "tsx apps/cli/src/index.ts registry:sync",
-    "extension:icons": "python scripts/generate_extension_icons.py"
+    "extension:icons": "python scripts/generate_extension_icons.py",
+    "worker": "tsx apps/worker/src/index.ts run",
+    "worker:login": "tsx apps/worker/src/index.ts login",
+    "worker:try": "tsx apps/worker/src/index.ts try",
+    "worker:smoke": "tsx apps/worker/src/smoke.ts"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.7",

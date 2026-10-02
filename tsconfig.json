@@ -48,6 +48,9 @@
       ],
       "@jobhunt/api-client": [
         "packages/api-client/src/index.ts"
+      ],
+      "@jobhunt/documents": [
+        "packages/documents/src/index.ts"
       ]
     }
   },

@@ -20,6 +20,7 @@ export default defineConfig({
       '@jobhunt/services': r('./packages/services/src/index.ts'),
       '@jobhunt/contracts': r('./packages/contracts/src/index.ts'),
       '@jobhunt/api-client': r('./packages/api-client/src/index.ts'),
+      '@jobhunt/documents': r('./packages/documents/src/index.ts'),
     },
   },
 });
