@@ -1,0 +1,4401 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "JobHunt OS API",
+    "version": "0.1.0",
+    "description": "Backend for JobHunt OS. Single-tenant.\n\n**Two invariants the UI must respect:**\n1. Every job carries `gaps` — JD requirements the candidate does *not* have. Always render them. Never let the UI imply the candidate has a gap technology.\n2. Nothing in this API sends anything to another human. Outbound actions (Phase 4) will be draft-and-approve only."
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKey": {
+        "type": "apiKey",
+        "name": "x-api-key",
+        "in": "header"
+      }
+    },
+    "schemas": {}
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Liveness — is the process up",
+        "tags": [
+          "health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "degraded"
+                      ]
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "uptimeSeconds": {
+                      "type": "number"
+                    },
+                    "checks": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "version",
+                    "uptimeSeconds",
+                    "checks"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "summary": "Readiness — is the database reachable",
+        "tags": [
+          "health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "degraded"
+                      ]
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "uptimeSeconds": {
+                      "type": "number"
+                    },
+                    "checks": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "version",
+                    "uptimeSeconds",
+                    "checks"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok",
+                        "degraded"
+                      ]
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "uptimeSeconds": {
+                      "type": "number"
+                    },
+                    "checks": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "version",
+                    "uptimeSeconds",
+                    "checks"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/companies": {
+      "get": {
+        "summary": "List the target company registry",
+        "tags": [
+          "companies"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "enabled",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "greenhouse",
+                "lever",
+                "ashby",
+                "workday",
+                "smartrecruiters",
+                "unknown"
+              ]
+            },
+            "in": "query",
+            "name": "ats",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "tag",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "normalizedName": {
+                        "type": "string"
+                      },
+                      "ats": {
+                        "type": "string"
+                      },
+                      "token": {
+                        "type": "string"
+                      },
+                      "careersUrl": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "signal": {
+                        "nullable": true,
+                        "type": "number"
+                      },
+                      "tags": {
+                        "nullable": true,
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "enabled": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "normalizedName",
+                      "ats",
+                      "token",
+                      "careersUrl",
+                      "signal",
+                      "tags",
+                      "enabled",
+                      "createdAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a company to the registry (idempotent on ats + token)",
+        "tags": [
+          "companies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "ats": {
+                    "type": "string",
+                    "enum": [
+                      "greenhouse",
+                      "lever",
+                      "ashby",
+                      "workday",
+                      "smartrecruiters",
+                      "unknown"
+                    ]
+                  },
+                  "token": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "careersUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "signal": {
+                    "type": "integer",
+                    "minimum": -5,
+                    "maximum": 5
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "name",
+                  "ats",
+                  "token"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "normalizedName": {
+                      "type": "string"
+                    },
+                    "ats": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "careersUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "signal": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "tags": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "normalizedName",
+                    "ats",
+                    "token",
+                    "careersUrl",
+                    "signal",
+                    "tags",
+                    "enabled",
+                    "createdAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/companies/{id}": {
+      "get": {
+        "summary": "Get one company",
+        "tags": [
+          "companies"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "normalizedName": {
+                      "type": "string"
+                    },
+                    "ats": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "careersUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "signal": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "tags": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "normalizedName",
+                    "ats",
+                    "token",
+                    "careersUrl",
+                    "signal",
+                    "tags",
+                    "enabled",
+                    "createdAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update a company",
+        "tags": [
+          "companies"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "ats": {
+                    "type": "string",
+                    "enum": [
+                      "greenhouse",
+                      "lever",
+                      "ashby",
+                      "workday",
+                      "smartrecruiters",
+                      "unknown"
+                    ]
+                  },
+                  "token": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "careersUrl": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "signal": {
+                    "type": "integer",
+                    "minimum": -5,
+                    "maximum": 5
+                  },
+                  "tags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "enabled": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "normalizedName": {
+                      "type": "string"
+                    },
+                    "ats": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "careersUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "signal": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "tags": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "enabled": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "normalizedName",
+                    "ats",
+                    "token",
+                    "careersUrl",
+                    "signal",
+                    "tags",
+                    "enabled",
+                    "createdAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove a company from the registry",
+        "tags": [
+          "companies"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "nullable": true,
+                  "enum": [
+                    null
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/companies/detect": {
+      "post": {
+        "summary": "Identify the ATS and board token behind a careers URL",
+        "tags": [
+          "companies"
+        ],
+        "description": "Paste any job or careers URL. Returns the ATS type and the board token needed to poll its public API. This is the fastest way to grow the registry.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "minLength": 4
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ats": {
+                      "type": "string",
+                      "enum": [
+                        "greenhouse",
+                        "lever",
+                        "ashby",
+                        "workday",
+                        "smartrecruiters",
+                        "unknown"
+                      ]
+                    },
+                    "token": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "meta": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "string"
+                      }
+                    },
+                    "note": {
+                      "type": "string"
+                    },
+                    "suggestion": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "ats": {
+                          "type": "string",
+                          "enum": [
+                            "greenhouse",
+                            "lever",
+                            "ashby",
+                            "workday",
+                            "smartrecruiters",
+                            "unknown"
+                          ]
+                        },
+                        "token": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "careersUrl": {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        "signal": {
+                          "type": "integer",
+                          "minimum": -5,
+                          "maximum": 5
+                        },
+                        "tags": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "enabled": {
+                          "type": "boolean"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "ats",
+                    "token"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/companies/verify": {
+      "post": {
+        "summary": "Check which registry entries actually return jobs",
+        "tags": [
+          "companies"
+        ],
+        "description": "Polls each board once and reports working / empty / failed. Run this after bulk-adding companies to prune bad tokens.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "companyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "includeDisabled": {
+                    "default": true,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "companyId": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "ats": {
+                            "type": "string"
+                          },
+                          "token": {
+                            "type": "string"
+                          },
+                          "ok": {
+                            "type": "boolean"
+                          },
+                          "count": {
+                            "type": "number"
+                          },
+                          "error": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "companyId",
+                          "name",
+                          "ats",
+                          "token",
+                          "ok",
+                          "count"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "summary": {
+                      "type": "object",
+                      "properties": {
+                        "working": {
+                          "type": "number"
+                        },
+                        "empty": {
+                          "type": "number"
+                        },
+                        "failed": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "working",
+                        "empty",
+                        "failed"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "results",
+                    "summary"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs": {
+      "get": {
+        "summary": "List scored jobs",
+        "tags": [
+          "jobs"
+        ],
+        "description": "The approval-inbox feed. Filters compose: `?tier=1,2&status=to_apply&excludeDisqualified=true&sortBy=score`. Every item carries `gaps` — the JD requirements the candidate does not have. Render them; never hide them.",
+        "parameters": [
+          {
+            "schema": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "in": "query",
+            "name": "offset",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 4
+              }
+            },
+            "in": "query",
+            "name": "tier",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "to_apply",
+                  "queued",
+                  "applied",
+                  "skipped",
+                  "expired"
+                ]
+              }
+            },
+            "in": "query",
+            "name": "status",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "in": "query",
+            "name": "source",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "remote",
+                  "hybrid",
+                  "onsite",
+                  "unknown"
+                ]
+              }
+            },
+            "in": "query",
+            "name": "workMode",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "in": "query",
+            "name": "minScore",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "in": "query",
+            "name": "maxScore",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "q",
+            "required": false
+          },
+          {
+            "schema": {},
+            "in": "query",
+            "name": "since",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "excludeDisqualified",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "in": "query",
+            "name": "maxGhostScore",
+            "required": false
+          },
+          {
+            "schema": {
+              "default": "score",
+              "type": "string",
+              "enum": [
+                "score",
+                "postedAt",
+                "firstSeenAt",
+                "company"
+              ]
+            },
+            "in": "query",
+            "name": "sortBy",
+            "required": false
+          },
+          {
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "in": "query",
+            "name": "sortDir",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "dedupHash": {
+                            "type": "string"
+                          },
+                          "companyId": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "sourceId": {
+                            "type": "string"
+                          },
+                          "company": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "url": {
+                            "type": "string"
+                          },
+                          "applyUrl": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "locationRaw": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "locations": {
+                            "nullable": true,
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "workMode": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "seniority": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "salaryMin": {
+                            "nullable": true,
+                            "type": "number"
+                          },
+                          "salaryMax": {
+                            "nullable": true,
+                            "type": "number"
+                          },
+                          "salaryCurrency": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "salaryInrLpa": {
+                            "nullable": true,
+                            "type": "number"
+                          },
+                          "postedAt": {
+                            "nullable": true,
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "updatedAt": {
+                            "nullable": true,
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "firstSeenAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "score": {
+                            "nullable": true,
+                            "type": "number"
+                          },
+                          "tier": {
+                            "nullable": true,
+                            "type": "number"
+                          },
+                          "breakdown": {
+                            "nullable": true,
+                            "type": "object",
+                            "additionalProperties": {
+                              "type": "number"
+                            }
+                          },
+                          "matchedSkills": {
+                            "nullable": true,
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "gaps": {
+                            "nullable": true,
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "ghostScore": {
+                            "nullable": true,
+                            "type": "number"
+                          },
+                          "ghostReasons": {
+                            "nullable": true,
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "disqualified": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "seenOn": {
+                            "nullable": true,
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "dedupHash",
+                          "companyId",
+                          "source",
+                          "sourceId",
+                          "company",
+                          "title",
+                          "url",
+                          "applyUrl",
+                          "locationRaw",
+                          "locations",
+                          "workMode",
+                          "seniority",
+                          "salaryMin",
+                          "salaryMax",
+                          "salaryCurrency",
+                          "salaryInrLpa",
+                          "postedAt",
+                          "updatedAt",
+                          "firstSeenAt",
+                          "score",
+                          "tier",
+                          "breakdown",
+                          "matchedSkills",
+                          "gaps",
+                          "ghostScore",
+                          "ghostReasons",
+                          "disqualified",
+                          "seenOn",
+                          "status"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "total": {
+                      "type": "number"
+                    },
+                    "limit": {
+                      "type": "number"
+                    },
+                    "offset": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{id}": {
+      "get": {
+        "summary": "Get one job, including the full description text",
+        "tags": [
+          "jobs"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "dedupHash": {
+                      "type": "string"
+                    },
+                    "companyId": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "sourceId": {
+                      "type": "string"
+                    },
+                    "company": {
+                      "type": "string"
+                    },
+                    "companyNormalized": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "titleNormalized": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "applyUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "locationRaw": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "locations": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "workMode": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "seniority": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "descriptionText": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "salaryMin": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "salaryMax": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "salaryCurrency": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "salaryInrLpa": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "postedAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "firstSeenAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "score": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "tier": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "breakdown": {
+                      "nullable": true,
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "matchedSkills": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "gaps": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "ghostScore": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "ghostReasons": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "disqualified": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "seenOn": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "dedupHash",
+                    "companyId",
+                    "source",
+                    "sourceId",
+                    "company",
+                    "companyNormalized",
+                    "title",
+                    "titleNormalized",
+                    "url",
+                    "applyUrl",
+                    "locationRaw",
+                    "locations",
+                    "workMode",
+                    "seniority",
+                    "descriptionText",
+                    "salaryMin",
+                    "salaryMax",
+                    "salaryCurrency",
+                    "salaryInrLpa",
+                    "postedAt",
+                    "updatedAt",
+                    "firstSeenAt",
+                    "score",
+                    "tier",
+                    "breakdown",
+                    "matchedSkills",
+                    "gaps",
+                    "ghostScore",
+                    "ghostReasons",
+                    "disqualified",
+                    "seenOn",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/{id}/status": {
+      "patch": {
+        "summary": "Move a job through the pipeline",
+        "tags": [
+          "jobs"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "to_apply",
+                      "queued",
+                      "applied",
+                      "skipped",
+                      "expired"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "dedupHash": {
+                      "type": "string"
+                    },
+                    "companyId": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "sourceId": {
+                      "type": "string"
+                    },
+                    "company": {
+                      "type": "string"
+                    },
+                    "companyNormalized": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "titleNormalized": {
+                      "type": "string"
+                    },
+                    "url": {
+                      "type": "string"
+                    },
+                    "applyUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "locationRaw": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "locations": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "workMode": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "seniority": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "descriptionText": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "salaryMin": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "salaryMax": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "salaryCurrency": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "salaryInrLpa": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "postedAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "firstSeenAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "score": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "tier": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "breakdown": {
+                      "nullable": true,
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "matchedSkills": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "gaps": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "ghostScore": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "ghostReasons": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "disqualified": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "seenOn": {
+                      "nullable": true,
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "status": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "dedupHash",
+                    "companyId",
+                    "source",
+                    "sourceId",
+                    "company",
+                    "companyNormalized",
+                    "title",
+                    "titleNormalized",
+                    "url",
+                    "applyUrl",
+                    "locationRaw",
+                    "locations",
+                    "workMode",
+                    "seniority",
+                    "descriptionText",
+                    "salaryMin",
+                    "salaryMax",
+                    "salaryCurrency",
+                    "salaryInrLpa",
+                    "postedAt",
+                    "updatedAt",
+                    "firstSeenAt",
+                    "score",
+                    "tier",
+                    "breakdown",
+                    "matchedSkills",
+                    "gaps",
+                    "ghostScore",
+                    "ghostReasons",
+                    "disqualified",
+                    "seenOn",
+                    "status"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/status": {
+      "post": {
+        "summary": "Bulk status change",
+        "tags": [
+          "jobs"
+        ],
+        "description": "Used by the approval inbox to clear a batch of decisions in one call.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ids": {
+                    "minItems": 1,
+                    "maxItems": 500,
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "to_apply",
+                      "queued",
+                      "applied",
+                      "skipped",
+                      "expired"
+                    ]
+                  }
+                },
+                "required": [
+                  "ids",
+                  "status"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "updated": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "updated"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/jobs/ingest-batch": {
+      "post": {
+        "summary": "Ingest raw jobs from Chrome Extension or external scraper",
+        "tags": [
+          "jobs"
+        ],
+        "description": "Used by the Manifest V3 Chrome extension to ingest live LinkedIn / Naukri postings directly into the scoring pipeline.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "source": {
+                    "default": "linkedin",
+                    "type": "string"
+                  },
+                  "jobs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "sourceId": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "company": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "url": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "locationRaw": {
+                          "type": "string"
+                        },
+                        "descriptionText": {
+                          "default": "",
+                          "type": "string"
+                        },
+                        "compensationRaw": {
+                          "type": "string"
+                        },
+                        "postedAt": {}
+                      },
+                      "required": [
+                        "sourceId",
+                        "company",
+                        "title",
+                        "url"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "jobs"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "received": {
+                      "type": "number"
+                    },
+                    "unique": {
+                      "type": "number"
+                    },
+                    "duplicatesCollapsed": {
+                      "type": "number"
+                    },
+                    "inserted": {
+                      "type": "number"
+                    },
+                    "updated": {
+                      "type": "number"
+                    },
+                    "tiers": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    }
+                  },
+                  "required": [
+                    "received",
+                    "unique",
+                    "duplicatesCollapsed",
+                    "inserted",
+                    "updated",
+                    "tiers"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/ingest": {
+      "post": {
+        "summary": "Poll every enabled board, dedupe, score and persist",
+        "tags": [
+          "runs"
+        ],
+        "description": "Synchronous today — it returns when the run completes. Boards are polled with bounded concurrency and a politeness delay. Pass `dryRun: true` to see what would land without writing.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "companyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "concurrency": {
+                    "default": 4,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 10
+                  },
+                  "maxAgeDays": {
+                    "default": 45,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 365
+                  },
+                  "dryRun": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "runId": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "startedAt": {
+                      "type": "string"
+                    },
+                    "finishedAt": {
+                      "type": "string"
+                    },
+                    "durationMs": {
+                      "type": "number"
+                    },
+                    "boards": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "companyId": {
+                            "type": "string"
+                          },
+                          "company": {
+                            "type": "string"
+                          },
+                          "ats": {
+                            "type": "string"
+                          },
+                          "token": {
+                            "type": "string"
+                          },
+                          "fetched": {
+                            "type": "number"
+                          },
+                          "error": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "companyId",
+                          "company",
+                          "ats",
+                          "token",
+                          "fetched"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "fetched": {
+                      "type": "number"
+                    },
+                    "afterAgeFilter": {
+                      "type": "number"
+                    },
+                    "unique": {
+                      "type": "number"
+                    },
+                    "duplicatesCollapsed": {
+                      "type": "number"
+                    },
+                    "inserted": {
+                      "type": "number"
+                    },
+                    "updated": {
+                      "type": "number"
+                    },
+                    "tiers": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "company": {
+                            "type": "string"
+                          },
+                          "error": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "company",
+                          "error"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "runId",
+                    "startedAt",
+                    "finishedAt",
+                    "durationMs",
+                    "boards",
+                    "fetched",
+                    "afterAgeFilter",
+                    "unique",
+                    "duplicatesCollapsed",
+                    "inserted",
+                    "updated",
+                    "tiers",
+                    "errors"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs": {
+      "get": {
+        "summary": "Recent runs",
+        "tags": [
+          "runs"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "default": 20,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "module": {
+                        "type": "string"
+                      },
+                      "startedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "finishedAt": {
+                        "nullable": true,
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "stats": {
+                        "nullable": true
+                      },
+                      "error": {
+                        "nullable": true,
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "module",
+                      "startedAt",
+                      "finishedAt",
+                      "status",
+                      "stats",
+                      "error"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/runs/{id}": {
+      "get": {
+        "summary": "One run, with its full stats payload",
+        "tags": [
+          "runs"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "module": {
+                      "type": "string"
+                    },
+                    "startedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "finishedAt": {
+                      "nullable": true,
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "stats": {
+                      "nullable": true
+                    },
+                    "error": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "module",
+                    "startedAt",
+                    "finishedAt",
+                    "status",
+                    "stats",
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile": {
+      "get": {
+        "summary": "The effective scoring profile, plus whatever the UI has overridden",
+        "tags": [
+          "profile"
+        ],
+        "description": "`effective` is what the scorer actually uses: the code default merged with `overrides`. `gaps` lists technologies the candidate does not have — the scorer can never count them as a match.",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "effective": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "homeCity": {
+                          "type": "string"
+                        },
+                        "acceptableCities": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "yearsExperience": {
+                          "type": "number"
+                        },
+                        "skills": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        },
+                        "gaps": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "targetTitles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "excludeTitles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "minSalaryInrLpa": {
+                          "type": "number"
+                        },
+                        "flexSalaryInrLpa": {
+                          "type": "number"
+                        },
+                        "acceptableSeniority": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "workModePriority": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "homeCity",
+                        "acceptableCities",
+                        "yearsExperience",
+                        "skills",
+                        "gaps",
+                        "targetTitles",
+                        "excludeTitles",
+                        "minSalaryInrLpa",
+                        "flexSalaryInrLpa",
+                        "acceptableSeniority",
+                        "workModePriority"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "overrides": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "effective",
+                    "overrides"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/overrides": {
+      "put": {
+        "summary": "Replace the profile overrides",
+        "tags": [
+          "profile"
+        ],
+        "description": "Partial by design — omitted fields fall through to the code default. `skills` merges rather than replaces, so you can nudge one weight. Call POST /profile/rescore afterwards to apply it to stored jobs.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "skills": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 5
+                    }
+                  },
+                  "gaps": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "targetTitles": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "excludeTitles": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "minSalaryInrLpa": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 500
+                  },
+                  "flexSalaryInrLpa": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 500
+                  },
+                  "acceptableSeniority": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "intern",
+                        "junior",
+                        "mid",
+                        "senior",
+                        "staff",
+                        "lead",
+                        "manager",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "workModePriority": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "remote",
+                        "hybrid",
+                        "onsite",
+                        "unknown"
+                      ]
+                    }
+                  },
+                  "acceptableCities": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "homeCity": {
+                    "type": "string"
+                  },
+                  "yearsExperience": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 60
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "effective": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "homeCity": {
+                          "type": "string"
+                        },
+                        "acceptableCities": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "yearsExperience": {
+                          "type": "number"
+                        },
+                        "skills": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        },
+                        "gaps": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "targetTitles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "excludeTitles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "minSalaryInrLpa": {
+                          "type": "number"
+                        },
+                        "flexSalaryInrLpa": {
+                          "type": "number"
+                        },
+                        "acceptableSeniority": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "workModePriority": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "homeCity",
+                        "acceptableCities",
+                        "yearsExperience",
+                        "skills",
+                        "gaps",
+                        "targetTitles",
+                        "excludeTitles",
+                        "minSalaryInrLpa",
+                        "flexSalaryInrLpa",
+                        "acceptableSeniority",
+                        "workModePriority"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "overrides": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "effective",
+                    "overrides"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Drop all overrides and fall back to the code default",
+        "tags": [
+          "profile"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "effective": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "homeCity": {
+                          "type": "string"
+                        },
+                        "acceptableCities": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "yearsExperience": {
+                          "type": "number"
+                        },
+                        "skills": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        },
+                        "gaps": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "targetTitles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "excludeTitles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "minSalaryInrLpa": {
+                          "type": "number"
+                        },
+                        "flexSalaryInrLpa": {
+                          "type": "number"
+                        },
+                        "acceptableSeniority": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "workModePriority": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "homeCity",
+                        "acceptableCities",
+                        "yearsExperience",
+                        "skills",
+                        "gaps",
+                        "targetTitles",
+                        "excludeTitles",
+                        "minSalaryInrLpa",
+                        "flexSalaryInrLpa",
+                        "acceptableSeniority",
+                        "workModePriority"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "overrides": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "effective",
+                    "overrides"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/profile/rescore": {
+      "post": {
+        "summary": "Re-score every stored job against the current profile",
+        "tags": [
+          "profile"
+        ],
+        "description": "Scoring is a pure function of (job, profile, now), so this needs no network calls. Run it after any profile change.",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "scanned": {
+                      "type": "number"
+                    },
+                    "changed": {
+                      "type": "number"
+                    },
+                    "tiers": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "durationMs": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "scanned",
+                    "changed",
+                    "tiers",
+                    "durationMs"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "summary": "Dashboard counters",
+        "tags": [
+          "stats"
+        ],
+        "description": "One call for the console header: registry size, job counts by tier/status/source, and the last ingest.",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "companies": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number"
+                        },
+                        "enabled": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "enabled"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "jobs": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "number"
+                        },
+                        "byTier": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        },
+                        "byStatus": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        },
+                        "bySource": {
+                          "type": "object",
+                          "additionalProperties": {
+                            "type": "number"
+                          }
+                        }
+                      },
+                      "required": [
+                        "total",
+                        "byTier",
+                        "byStatus",
+                        "bySource"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "lastIngest": {
+                      "type": "object",
+                      "properties": {
+                        "at": {
+                          "nullable": true,
+                          "type": "string",
+                          "format": "date-time"
+                        },
+                        "status": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "fetched": {
+                          "nullable": true,
+                          "type": "number"
+                        },
+                        "inserted": {
+                          "nullable": true,
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "at",
+                        "status",
+                        "fetched",
+                        "inserted"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "companies",
+                    "jobs",
+                    "lastIngest"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/events": {
+      "get": {
+        "summary": "Audit log",
+        "tags": [
+          "events"
+        ],
+        "description": "Every state change, newest first. Phase 3+ attaches a screenshot path to browser actions.",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "entityType",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "entityId",
+            "required": false
+          },
+          {
+            "schema": {
+              "default": 100,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 500
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "entityType": {
+                        "type": "string"
+                      },
+                      "entityId": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "action": {
+                        "type": "string"
+                      },
+                      "actor": {
+                        "type": "string"
+                      },
+                      "payload": {
+                        "nullable": true
+                      },
+                      "screenshotPath": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "entityType",
+                      "entityId",
+                      "action",
+                      "actor",
+                      "payload",
+                      "screenshotPath",
+                      "createdAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inbox/messages": {
+      "get": {
+        "summary": "List email communications and auto-classified messages",
+        "tags": [
+          "inbox"
+        ],
+        "description": "Filter by category (interview_invite, assessment_link, application_ack, rejection, recruiter_outreach), actionRequired, or query.",
+        "parameters": [
+          {
+            "schema": {
+              "default": 50,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            },
+            "in": "query",
+            "name": "limit",
+            "required": false
+          },
+          {
+            "schema": {
+              "default": 0,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "in": "query",
+            "name": "offset",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string",
+              "enum": [
+                "interview_invite",
+                "assessment_link",
+                "application_ack",
+                "rejection",
+                "recruiter_outreach",
+                "offer",
+                "other"
+              ]
+            },
+            "in": "query",
+            "name": "category",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "linkedJobId",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "actionRequired",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "boolean"
+            },
+            "in": "query",
+            "name": "processed",
+            "required": false
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "query",
+            "name": "q",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "messageId": {
+                            "type": "string"
+                          },
+                          "threadId": {
+                            "type": "string"
+                          },
+                          "sender": {
+                            "type": "string"
+                          },
+                          "senderName": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "recipient": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "subject": {
+                            "type": "string"
+                          },
+                          "snippet": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "bodyText": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string",
+                            "enum": [
+                              "interview_invite",
+                              "assessment_link",
+                              "application_ack",
+                              "rejection",
+                              "recruiter_outreach",
+                              "offer",
+                              "other"
+                            ]
+                          },
+                          "companyMentioned": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "companyNormalized": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "jobTitleMentioned": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "assessmentUrl": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "interviewUrl": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "receivedAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "linkedJobId": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "actionRequired": {
+                            "type": "boolean"
+                          },
+                          "suggestedAction": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "draftReply": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "processed": {
+                            "type": "boolean"
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "messageId",
+                          "threadId",
+                          "sender",
+                          "senderName",
+                          "recipient",
+                          "subject",
+                          "snippet",
+                          "bodyText",
+                          "category",
+                          "companyMentioned",
+                          "companyNormalized",
+                          "jobTitleMentioned",
+                          "assessmentUrl",
+                          "interviewUrl",
+                          "receivedAt",
+                          "linkedJobId",
+                          "actionRequired",
+                          "suggestedAction",
+                          "draftReply",
+                          "processed",
+                          "createdAt"
+                        ],
+                        "additionalProperties": false
+                      }
+                    },
+                    "total": {
+                      "type": "number"
+                    },
+                    "limit": {
+                      "type": "number"
+                    },
+                    "offset": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "total",
+                    "limit",
+                    "offset"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inbox/messages/{id}": {
+      "get": {
+        "summary": "Get single inbox message details",
+        "tags": [
+          "inbox"
+        ],
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "messageId": {
+                      "type": "string"
+                    },
+                    "threadId": {
+                      "type": "string"
+                    },
+                    "sender": {
+                      "type": "string"
+                    },
+                    "senderName": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "recipient": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    },
+                    "snippet": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "bodyText": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string",
+                      "enum": [
+                        "interview_invite",
+                        "assessment_link",
+                        "application_ack",
+                        "rejection",
+                        "recruiter_outreach",
+                        "offer",
+                        "other"
+                      ]
+                    },
+                    "companyMentioned": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "companyNormalized": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "jobTitleMentioned": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "assessmentUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "interviewUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "receivedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "linkedJobId": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "actionRequired": {
+                      "type": "boolean"
+                    },
+                    "suggestedAction": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "draftReply": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "processed": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "messageId",
+                    "threadId",
+                    "sender",
+                    "senderName",
+                    "recipient",
+                    "subject",
+                    "snippet",
+                    "bodyText",
+                    "category",
+                    "companyMentioned",
+                    "companyNormalized",
+                    "jobTitleMentioned",
+                    "assessmentUrl",
+                    "interviewUrl",
+                    "receivedAt",
+                    "linkedJobId",
+                    "actionRequired",
+                    "suggestedAction",
+                    "draftReply",
+                    "processed",
+                    "createdAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update message action status or linked job",
+        "tags": [
+          "inbox"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "processed": {
+                    "type": "boolean"
+                  },
+                  "actionRequired": {
+                    "type": "boolean"
+                  },
+                  "linkedJobId": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "draftReply": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "messageId": {
+                      "type": "string"
+                    },
+                    "threadId": {
+                      "type": "string"
+                    },
+                    "sender": {
+                      "type": "string"
+                    },
+                    "senderName": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "recipient": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    },
+                    "snippet": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "bodyText": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "category": {
+                      "type": "string",
+                      "enum": [
+                        "interview_invite",
+                        "assessment_link",
+                        "application_ack",
+                        "rejection",
+                        "recruiter_outreach",
+                        "offer",
+                        "other"
+                      ]
+                    },
+                    "companyMentioned": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "companyNormalized": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "jobTitleMentioned": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "assessmentUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "interviewUrl": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "receivedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "linkedJobId": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "actionRequired": {
+                      "type": "boolean"
+                    },
+                    "suggestedAction": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "draftReply": {
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "processed": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "messageId",
+                    "threadId",
+                    "sender",
+                    "senderName",
+                    "recipient",
+                    "subject",
+                    "snippet",
+                    "bodyText",
+                    "category",
+                    "companyMentioned",
+                    "companyNormalized",
+                    "jobTitleMentioned",
+                    "assessmentUrl",
+                    "interviewUrl",
+                    "receivedAt",
+                    "linkedJobId",
+                    "actionRequired",
+                    "suggestedAction",
+                    "draftReply",
+                    "processed",
+                    "createdAt"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inbox/sync": {
+      "post": {
+        "summary": "Synchronize emails from Gmail API and auto-classify",
+        "tags": [
+          "inbox"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "accessToken": {
+                    "type": "string"
+                  },
+                  "query": {
+                    "type": "string"
+                  },
+                  "maxResults": {
+                    "default": 25,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "synced": {
+                      "type": "number"
+                    },
+                    "inserted": {
+                      "type": "number"
+                    },
+                    "updated": {
+                      "type": "number"
+                    },
+                    "linkedToJobs": {
+                      "type": "number"
+                    },
+                    "categories": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "actionRequired": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "synced",
+                    "inserted",
+                    "updated",
+                    "linkedToJobs",
+                    "categories",
+                    "actionRequired"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inbox/messages/{id}/draft": {
+      "post": {
+        "summary": "Generate an AI-powered truthful draft reply to an email",
+        "tags": [
+          "inbox"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "instructions": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "messageId": {
+                      "type": "string"
+                    },
+                    "draftBody": {
+                      "type": "string"
+                    },
+                    "subject": {
+                      "type": "string"
+                    },
+                    "to": {
+                      "type": "string"
+                    },
+                    "actionCategory": {
+                      "type": "string",
+                      "enum": [
+                        "interview_invite",
+                        "assessment_link",
+                        "application_ack",
+                        "rejection",
+                        "recruiter_outreach",
+                        "offer",
+                        "other"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "messageId",
+                    "draftBody",
+                    "subject",
+                    "to",
+                    "actionCategory"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string"
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "details": {},
+                        "requestId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message",
+                        "requestId"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/inbox/stats": {
+      "get": {
+        "summary": "Inbox summary statistics and actionable counts",
+        "tags": [
+          "inbox"
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "number"
+                    },
+                    "byCategory": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "actionRequiredCount": {
+                      "type": "number"
+                    },
+                    "processedCount": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "total",
+                    "byCategory",
+                    "actionRequiredCount",
+                    "processedCount"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connectors/linkedin/search": {
+      "post": {
+        "summary": "Search and ingest live LinkedIn jobs into the unified scoring pipeline",
+        "tags": [
+          "connectors"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "location": {
+                    "default": "India",
+                    "type": "string"
+                  },
+                  "limit": {
+                    "default": 25,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  "sessionCookie": {
+                    "type": "string"
+                  },
+                  "apifyToken": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "type": "string"
+                    },
+                    "fetched": {
+                      "type": "number"
+                    },
+                    "inserted": {
+                      "type": "number"
+                    },
+                    "updated": {
+                      "type": "number"
+                    },
+                    "tiers": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "jobs": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  },
+                  "required": [
+                    "source",
+                    "fetched",
+                    "inserted",
+                    "updated",
+                    "tiers",
+                    "jobs"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connectors/naukri/search": {
+      "post": {
+        "summary": "Search and ingest live Naukri jobs into the unified scoring pipeline",
+        "tags": [
+          "connectors"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "location": {
+                    "default": "Chennai, Bangalore, Remote",
+                    "type": "string"
+                  },
+                  "experience": {
+                    "type": "number"
+                  },
+                  "limit": {
+                    "default": 25,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  "apifyToken": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "type": "string"
+                    },
+                    "fetched": {
+                      "type": "number"
+                    },
+                    "inserted": {
+                      "type": "number"
+                    },
+                    "updated": {
+                      "type": "number"
+                    },
+                    "tiers": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "jobs": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  },
+                  "required": [
+                    "source",
+                    "fetched",
+                    "inserted",
+                    "updated",
+                    "tiers",
+                    "jobs"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connectors/indeed/search": {
+      "post": {
+        "summary": "Search and ingest live Indeed jobs into the unified scoring pipeline",
+        "tags": [
+          "connectors"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "location": {
+                    "default": "India",
+                    "type": "string"
+                  },
+                  "country": {
+                    "default": "in",
+                    "type": "string",
+                    "enum": [
+                      "in",
+                      "us",
+                      "uk",
+                      "ca"
+                    ]
+                  },
+                  "limit": {
+                    "default": 25,
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "type": "string"
+                    },
+                    "fetched": {
+                      "type": "number"
+                    },
+                    "inserted": {
+                      "type": "number"
+                    },
+                    "updated": {
+                      "type": "number"
+                    },
+                    "tiers": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "number"
+                      }
+                    },
+                    "jobs": {
+                      "type": "array",
+                      "items": {}
+                    }
+                  },
+                  "required": [
+                    "source",
+                    "fetched",
+                    "inserted",
+                    "updated",
+                    "tiers",
+                    "jobs"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connectors/test": {
+      "post": {
+        "summary": "Test authentication and connectivity for job boards and external services",
+        "tags": [
+          "connectors"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "platform": {
+                    "type": "string",
+                    "enum": [
+                      "gmail",
+                      "linkedin",
+                      "naukri",
+                      "indeed",
+                      "gemini"
+                    ]
+                  },
+                  "credentials": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "platform"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "platform": {
+                      "type": "string"
+                    },
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "latencyMs": {
+                      "type": "number"
+                    },
+                    "details": {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  },
+                  "required": [
+                    "platform",
+                    "ok",
+                    "message",
+                    "latencyMs"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:4000"
+    }
+  ],
+  "security": [],
+  "tags": [
+    {
+      "name": "health",
+      "description": "Liveness and readiness"
+    },
+    {
+      "name": "companies",
+      "description": "Target company registry and ATS detection"
+    },
+    {
+      "name": "jobs",
+      "description": "Scored jobs — the approval inbox feed"
+    },
+    {
+      "name": "runs",
+      "description": "Ingest runs"
+    },
+    {
+      "name": "profile",
+      "description": "Scoring profile and rescoring"
+    },
+    {
+      "name": "stats",
+      "description": "Dashboard counters"
+    },
+    {
+      "name": "events",
+      "description": "Audit log"
+    },
+    {
+      "name": "inbox",
+      "description": "Gmail and communication intelligence"
+    },
+    {
+      "name": "connectors",
+      "description": "Live search and platform integrations"
+    }
+  ]
+}
