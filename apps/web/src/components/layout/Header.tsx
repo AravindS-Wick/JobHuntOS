@@ -58,14 +58,14 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={() => onSelectTab?.('integrations')}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-dark-card border border-gray-800 hover:border-gray-600 text-gray-300 transition"
-            title="Fastify API backend listening on port 4000"
+            title={appStore.isBackendConnected ? 'Fastify API backend connected on port 4000' : 'API unreachable on port 4000 - showing built-in demo data'}
           >
             <span
               className={`w-2 h-2 rounded-full ${
-                appStore.isBackendConnected ? 'bg-accent-emerald animate-pulse' : 'bg-accent-emerald'
+                appStore.isBackendConnected ? 'bg-accent-emerald animate-pulse' : 'bg-red-500'
               }`}
             ></span>
-            <span className="font-mono text-[11px]">API :4000</span>
+            <span className="font-mono text-[11px]">{appStore.isBackendConnected ? 'API :4000' : 'API offline (demo data)'}</span>
           </button>
 
           <button
