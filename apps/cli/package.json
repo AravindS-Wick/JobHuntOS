@@ -1,0 +1,17 @@
+{
+  "name": "@jobhunt/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@jobhunt/core": "workspace:*",
+    "@jobhunt/connectors": "workspace:*",
+    "@jobhunt/db": "workspace:*",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.7",
+    "picocolors": "^1.1.1",
+    "yaml": "^2.6.1",
+    "@jobhunt/services": "workspace:*"
+  }
+}
