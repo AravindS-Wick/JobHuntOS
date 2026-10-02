@@ -1,7 +1,9 @@
 # JobHunt OS
 
-Personal job-search automation, built to become a product only if the numbers
-justify it. Single-tenant today. Owner: Aravindhan Sivaraman.
+Job-search automation: find roles across job boards and company careers pages,
+tailor the resume per job without embellishment, and submit after the user
+batch-approves. Single-tenant today; the goal (Oct 2026) is a paid pro tier.
+Owner: Aravindhan Sivaraman.
 
 Full context lives in `docs/` — read `01-PRD.md` before changing behaviour and
 `00-FEASIBILITY-ANALYSIS.md` before arguing for a new feature.
@@ -16,11 +18,16 @@ relax them to "get more throughput".
    technologies the candidate does **not** have. They are surfaced honestly on
    every job card and must never be counted as a skill match, padded into a
    resume, or answered as experience on a screening form. When a fact is
-   missing, the system asks the user — it never infers.
+   missing, the system asks the user — it never infers. Tailored resumes may
+   only reorder and select from the master resume; `validateVariant` in
+   `packages/core/src/tailor.ts` blocks any new skill, bullet, number or
+   technology, and a failing variant can't be approved.
 2. **Nothing reaches another human without approval.** No auto-send email, no
    auto-send LinkedIn message, in any phase, until a template has earned
    autonomy through measured performance.
-3. **Rate governors are ceilings.** Market data says high-volume applying
+   Applications are submitted only after the user approves them (batch
+   approval in the console).
+3. **Rate governors are ceilings** (`packages/core/src/governor.ts`). Market data says high-volume applying
    converts at 0.1–2% while reviewed, tailored applying converts at 5–15%.
    Volume is not the goal.
 4. **Authenticated actions run locally.** LinkedIn, Naukri and ATS form
@@ -37,22 +44,31 @@ relax them to "get more throughput".
 
 Turborepo · pnpm · Node 22 · TypeScript (strict, `noUncheckedIndexedAccess`)
 · Zod at every boundary · Vitest · Postgres 16 + pgvector + Drizzle · Redis
-Built: Fastify + Zod API, Vite/React console (`apps/web`), MV3 extension (`apps/extension`).
-Planned: tRPC, BullMQ, Playwright (headed, persistent context), Next.js 15 console, python-docx sidecar.
+Built: Fastify + Zod API, Vite/React console (`apps/web`), MV3 extension (`apps/extension`),
+Playwright browser worker (`apps/worker`, headed, persistent Chrome profile), DOCX/PDF rendering (`docx` + headless Chrome).
+Planned: referral engine, multi-tenant accounts + billing, LLM rephrasing behind `rephraseIsSafe`.
+No Docker needed locally: `DATABASE_URL=pglite` runs a persistent embedded Postgres under `.data/`.
 
 ## Layout
 
 ```
-packages/core         types, PROFILE, normalize, score, dedupe   — no IO
-packages/connectors   Greenhouse / Lever / Ashby, ATS detection  — all network IO
+packages/core         types, PROFILE, facts, resolver, score, dedupe, resume parse,
+                      tailor + truth validation, form answering, rate governor — no IO
+packages/connectors   all network IO: Greenhouse/Lever/Ashby/Workday/SmartRecruiters/Zoho Recruit,
+                      boards (LinkedIn guest, Instahyre, Foundit, YC, HN, RemoteOK, Amazon,
+                      Microsoft, Google), parsers for browser-captured Naukri/Indeed data, ATS detection
+packages/documents    resume text extraction (PDF/DOCX) and ATS-safe DOCX/PDF rendering
 packages/db           Drizzle schema, migrations, repositories, PGlite test harness
-packages/services     ingest · rescore · profile · registry-sync (no HTTP concerns)
+packages/services     ingest · boards · resumes · applications · agent (worker protocol) ·
+                      rescore · profile · facts · registry-sync (no HTTP concerns)
 packages/contracts    Zod schemas = the API contract; each export is schema AND type
 packages/api-client   typed fetch client the console imports
 apps/api              Fastify + Zod + OpenAPI  (routes are thin; logic lives in services)
 apps/cli              ingest · score · digest · detect · verify · demo · registry:sync
 apps/web              Vite + React decision cockpit (falls back to built-in demo data when the API is down)
 apps/extension        MV3 extension: scrape job cards, assisted Easy Apply autofill (never submits)
+apps/worker           local browser worker: claims tasks from the API, scrapes browser-only boards,
+                      submits approved applications, pauses at the Human Gate
 config/companies.yaml the Target Company Registry (the most valuable file here)
 fixtures/             real-shaped API payloads for offline tests
 ```
@@ -75,9 +91,22 @@ testable with a stubbed fetcher.
   applicable, a screenshot path.
 - Runtime inference uses the cheap model. The strong model is only for resume
   tailoring and cover letters.
-- **Network IO is injectable.** `ingestService.run({ fetcher })` takes the board
-  fetcher as a parameter so the pipeline is tested end-to-end without the
-  network. Follow the same pattern for the browser worker in Phase 3.
+- **Network IO is injectable.** `ingestService.run({ fetcher })`,
+  `boardService.run({ search })` and `applicationService.prepare({ render,
+  fetchQuestions })` take their IO as parameters so pipelines are tested
+  end-to-end without the network or Chrome.
+- **The API never drives a browser.** It queues `agent_tasks`; the worker on the
+  user's machine claims them over HTTP (`/agent/claim`) and reports one outcome.
+  Boards that block direct requests (Naukri, Indeed, Glassdoor, Wellfound,
+  Cutshort) are `mode: 'browser'` in `BOARDS` and become scrape tasks.
+- **Submit is clicked at most once.** After the submit click nothing retries
+  automatically; an unconfirmed submission is reported, never repeated.
+- **Form answering lives in core** (`answers.ts`): identity from the master
+  resume, everything else from facts or the resolver; unknown required →
+  Human Gate, and the human's answer can be saved as a fact.
+- **Live forms drift.** `pnpm worker:smoke` dry-runs current Greenhouse, Lever
+  and Ashby jobs with the sample resume (never submits). Run it after touching
+  `apps/worker/src/form.ts` or `runner.ts`.
 - **Tests use PGlite, not mocks.** Repository and route tests run against real
   Postgres compiled to WASM, so `on conflict`, `jsonb_agg` and friends behave
   exactly as they will in production.
@@ -102,7 +131,13 @@ pnpm ingest                        # poll enabled boards → out/jobs.json
 pnpm digest                        # re-print the last run
 pnpm test                          # all packages (PGlite, no external services)
 
-docker compose up -d               # Postgres 16 + pgvector, Redis
+pnpm worker:login                  # log in to LinkedIn/Naukri/… once in the worker's Chrome profile
+pnpm worker                        # drain the queue: browser searches + approved applications
+pnpm worker:try "<job url>"        # dry run: fill a real form with your resume, stop before Submit
+pnpm worker:smoke                  # live regression check on Greenhouse/Lever/Ashby (never submits)
+
+DATABASE_URL=pglite pnpm api       # API with persistent embedded Postgres, no Docker
+docker compose up -d               # or Postgres 16 + pgvector, Redis
 pnpm db:migrate                    # apply migrations
 pnpm registry:sync                 # companies.yaml -> database
 pnpm api                           # API on :4000, Swagger UI at /docs

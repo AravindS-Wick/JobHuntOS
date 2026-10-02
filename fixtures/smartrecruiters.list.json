@@ -1,0 +1,289 @@
+{
+ "offset": 0,
+ "limit": 3,
+ "totalFound": 4811,
+ "content": [
+  {
+   "id": "744000153203866",
+   "name": "Project Management Intern",
+   "uuid": "6b962252-1664-400c-98a0-dc24f889c780",
+   "jobAdId": "f0cc9035-4d52-4f09-bd3c-e7da249d60fa",
+   "defaultJobAd": true,
+   "refNumber": "REF297213U",
+   "company": {
+    "identifier": "BoschGroup",
+    "name": "Bosch Group"
+   },
+   "releasedDate": "2026-10-02T14:47:26.357Z",
+   "location": {
+    "city": "Plymouth",
+    "region": "MI",
+    "country": "us",
+    "address": "15000 North Haggerty Road",
+    "postalCode": "48170",
+    "remote": false,
+    "hybrid": true,
+    "latitude": "42.3917364",
+    "longitude": "-83.43853899999999",
+    "fullLocation": "Plymouth, MI, United States"
+   },
+   "industry": {
+    "id": "mechanical_engineering",
+    "label": "Mechanical Or Industrial Engineering"
+   },
+   "department": {},
+   "function": {
+    "id": "engineering",
+    "label": "Engineering"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "associate",
+    "label": "Associate"
+   },
+   "customField": [
+    {
+     "fieldId": "5abe2a4ab60a5e486a2d9b1d",
+     "fieldLabel": "Contract type",
+     "valueId": "1e46492b-d24f-460c-b095-38cf08a778d8",
+     "valueLabel": "Unlimited"
+    },
+    {
+     "fieldId": "5abe28e96d8bc56863dd9746",
+     "fieldLabel": "Tariff Area",
+     "valueId": "82f1dd4b-de9d-4134-9f1a-8d315be380ae",
+     "valueLabel": "United States Local Grades"
+    },
+    {
+     "fieldId": "586a997ee4b05fd937b86098",
+     "fieldLabel": "Legal Entity(acronym)",
+     "valueId": "RBUS",
+     "valueLabel": "RBUS"
+    },
+    {
+     "fieldId": "586a99b5e4b0daa006ae1079",
+     "fieldLabel": "Working Location",
+     "valueId": "Plymouth, MI",
+     "valueLabel": "Plymouth, MI"
+    },
+    {
+     "fieldId": "5abe295a6d8bc56863dd9747",
+     "fieldLabel": "Global Salary Level",
+     "valueId": "4319a4d2-6690-4a34-ac0f-9d8c126f1af2",
+     "valueLabel": "Junior/ Lower Tariff"
+    },
+    {
+     "fieldId": "69ca83a2489188782a1e9f87",
+     "fieldLabel": "Direct Or Indirect",
+     "valueId": "1aefbf4c-c10a-422e-a975-a504a7117792",
+     "valueLabel": "Indirect"
+    },
+    {
+     "fieldId": "5abe29f9b60a5e486a2d9b1c",
+     "fieldLabel": "Working hours",
+     "valueId": "ff7c69f3-f89c-498c-9a0e-25f4dad301d4",
+     "valueLabel": "Full-time and/or part-time"
+    },
+    {
+     "fieldId": "586a9995e4b0daa006ae1078",
+     "fieldLabel": "Legal Entity",
+     "valueId": "Robert Bosch LLC",
+     "valueLabel": "Robert Bosch LLC"
+    },
+    {
+     "fieldId": "691cf1c93001c782b9560ab7",
+     "fieldLabel": "Division full name",
+     "valueId": "1b180572-38a0-463d-8f17-a860bf7efdc8",
+     "valueLabel": "CP"
+    },
+    {
+     "fieldId": "5abe27936d8bc56863dd9745",
+     "fieldLabel": "Position type",
+     "valueId": "f524b939-fe55-407b-a0b0-e8f4eec28997",
+     "valueLabel": "Intern"
+    },
+    {
+     "fieldId": "COUNTRY",
+     "fieldLabel": "Country/Region",
+     "valueId": "us",
+     "valueLabel": "United States"
+    },
+    {
+     "fieldId": "586a971ee4b0daa006ae1077",
+     "fieldLabel": "Brands",
+     "valueId": "default",
+     "valueLabel": "Bosch Group"
+    },
+    {
+     "fieldId": "586a996ce4b05fd937b86097",
+     "fieldLabel": "Working Country",
+     "valueId": "US",
+     "valueLabel": "United States"
+    },
+    {
+     "fieldId": "586a9b22e4b05fd937b8609a",
+     "fieldLabel": "Local Grade",
+     "valueId": "US_HOURLYRR",
+     "valueLabel": "US_HOURLYRR"
+    },
+    {
+     "fieldId": "586a99a5e4b05fd937b86099",
+     "fieldLabel": "Division",
+     "valueId": "CP",
+     "valueLabel": "CP"
+    }
+   ],
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings/744000153203866",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  },
+  {
+   "id": "744000153195961",
+   "name": "Facilities Engineering Intern - Spring 2027",
+   "uuid": "03829414-c85f-4b4f-aff7-69fd9fb723ed",
+   "jobAdId": "f138404f-d56b-4030-bb8b-fe86d500afad",
+   "defaultJobAd": true,
+   "refNumber": "REF297636V",
+   "company": {
+    "identifier": "BoschGroup",
+    "name": "Bosch Group"
+   },
+   "releasedDate": "2026-10-02T14:12:38.439Z",
+   "location": {
+    "city": "Florence",
+    "region": "KY",
+    "country": "us",
+    "address": "15 Spiral Drive",
+    "postalCode": "41042",
+    "remote": false,
+    "hybrid": false,
+    "latitude": "39.0185073",
+    "longitude": "-84.6429503",
+    "fullLocation": "Florence, KY, United States"
+   },
+   "industry": {
+    "id": "automotive",
+    "label": "Automotive"
+   },
+   "department": {},
+   "function": {
+    "id": "manufacturing",
+    "label": "Manufacturing"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "internship",
+    "label": "Internship"
+   },
+   "customField": [
+    {
+     "fieldId": "5abe2a4ab60a5e486a2d9b1d",
+     "fieldLabel": "Contract type",
+     "valueId": "1e46492b-d24f-460c-b095-38cf08a778d8",
+     "valueLabel": "Unlimited"
+    },
+    {
+     "fieldId": "5abe28e96d8bc56863dd9746",
+     "fieldLabel": "Tariff Area",
+     "valueId": "82f1dd4b-de9d-4134-9f1a-8d315be380ae",
+     "valueLabel": "United States Local Grades"
+    },
+    {
+     "fieldId": "586a997ee4b05fd937b86098",
+     "fieldLabel": "Legal Entity(acronym)",
+     "valueId": "ASUS",
+     "valueLabel": "ASUS"
+    },
+    {
+     "fieldId": "586a99b5e4b0daa006ae1079",
+     "fieldLabel": "Working Location",
+     "valueId": "Florence, KY",
+     "valueLabel": "Florence, KY"
+    },
+    {
+     "fieldId": "5abe295a6d8bc56863dd9747",
+     "fieldLabel": "Global Salary Level",
+     "valueId": "4319a4d2-6690-4a34-ac0f-9d8c126f1af2",
+     "valueLabel": "Junior/ Lower Tariff"
+    },
+    {
+     "fieldId": "69ca83a2489188782a1e9f87",
+     "fieldLabel": "Direct Or Indirect",
+     "valueId": "1aefbf4c-c10a-422e-a975-a504a7117792",
+     "valueLabel": "Indirect"
+    },
+    {
+     "fieldId": "5abe29f9b60a5e486a2d9b1c",
+     "fieldLabel": "Working hours",
+     "valueId": "ff7c69f3-f89c-498c-9a0e-25f4dad301d4",
+     "valueLabel": "Full-time and/or part-time"
+    },
+    {
+     "fieldId": "586a9995e4b0daa006ae1078",
+     "fieldLabel": "Legal Entity",
+     "valueId": "Robert Bosch Automotive Steering LLC",
+     "valueLabel": "Robert Bosch Automotive Steering LLC"
+    },
+    {
+     "fieldId": "691cf1c93001c782b9560ab7",
+     "fieldLabel": "Division full name",
+     "valueId": "15bcc29d-90ec-4da5-9bc5-72863bc810d9",
+     "valueLabel": "Vehicle Motion"
+    },
+    {
+     "fieldId": "5abe27936d8bc56863dd9745",
+     "fieldLabel": "Position type",
+     "valueId": "f524b939-fe55-407b-a0b0-e8f4eec28997",
+     "valueLabel": "Intern"
+    },
+    {
+     "fieldId": "COUNTRY",
+     "fieldLabel": "Country/Region",
+     "valueId": "us",
+     "valueLabel": "United States"
+    },
+    {
+     "fieldId": "586a971ee4b0daa006ae1077",
+     "fieldLabel": "Brands",
+     "valueId": "default",
+     "valueLabel": "Bosch Group"
+    },
+    {
+     "fieldId": "586a996ce4b05fd937b86097",
+     "fieldLabel": "Working Country",
+     "valueId": "US",
+     "valueLabel": "United States"
+    },
+    {
+     "fieldId": "586a9b22e4b05fd937b8609a",
+     "fieldLabel": "Local Grade",
+     "valueId": "9ceea6ff-37fa-40a0-90e7-51fcc4977094",
+     "valueLabel": "US_N"
+    },
+    {
+     "fieldId": "586a99a5e4b05fd937b86099",
+     "fieldLabel": "Division",
+     "valueId": "CC",
+     "valueLabel": "VM"
+    }
+   ],
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings/744000153195961",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  }
+ ]
+}

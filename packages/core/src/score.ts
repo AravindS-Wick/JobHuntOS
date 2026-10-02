@@ -1,5 +1,6 @@
 import { PROFILE, type Profile } from './profile.js';
 import type { NormalizedJob, ScoreBreakdown, ScoredJob, Tier } from './types.js';
+import { mentions, mentionsTech } from './terms.js';
 
 const WEIGHTS = {
   stackMatch: 40,
@@ -10,12 +11,6 @@ const WEIGHTS = {
   titleRelevance: 5,
   companySignal: 5,
 } as const;
-
-/** Word-boundary match so "go" doesn't match "google" and "java" doesn't match "javascript". */
-function mentions(haystack: string, needle: string): boolean {
-  const esc = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`(^|[^a-z0-9+#])${esc}([^a-z0-9+#]|$)`, 'i').test(haystack);
-}
 
 export function matchSkills(job: NormalizedJob, profile: Profile = PROFILE) {
   const hay = `${job.title} ${job.descriptionText}`.toLowerCase();
@@ -30,7 +25,7 @@ export function matchSkills(job: NormalizedJob, profile: Profile = PROFILE) {
     }
   }
   // Gaps are requirements the JD asks for that the candidate does not have.
-  const gaps = profile.gaps.filter((g) => mentions(hay, g));
+  const gaps = profile.gaps.filter((g) => mentionsTech(hay, g));
   possible = earned + gaps.length * 4;
 
   // Collapse near-duplicate skill aliases so "react" + "react.js" isn't double credit.
@@ -60,7 +55,12 @@ function scoreSeniority(job: NormalizedJob, profile: Profile): number {
 
 function scoreWorkMode(job: NormalizedJob, profile: Profile): number {
   const idx = profile.workModePriority.indexOf(job.workMode);
-  if (job.workMode === 'unknown') return 0.5;
+  if (job.workMode === 'unknown') {
+    // Mode unstated but the role sits in a specific city you didn't list: treat it like onsite there.
+    const known = job.locations.filter((l) => l.trim());
+    const acceptable = known.some((l) => profile.acceptableCities.some((c) => l.toLowerCase().includes(c)));
+    return known.length && !acceptable ? 0.15 : 0.5;
+  }
   if (idx === -1) return 0.3;
   const base = 1 - idx * (1 / Math.max(1, profile.workModePriority.length));
   if (job.workMode === 'onsite' || job.workMode === 'hybrid') {
@@ -101,6 +101,16 @@ function scoreTitleRelevance(job: NormalizedJob, profile: Profile): number {
   return hit.startsWith('senior') || hit.includes('lead') ? 1 : 0.8;
 }
 
+/**
+ * Cheap pre-filter on the title alone: is this posting worth a request to
+ * fetch its description? Excluded disciplines never are.
+ */
+export function isTitleCandidate(title: string, profile: Profile = PROFILE): boolean {
+  const t = ` ${title.toLowerCase()} `;
+  if (profile.excludeTitles.some((x) => t.includes(` ${x.trim()}`))) return false;
+  return profile.targetTitles.some((x) => t.includes(x)) || /\b(engineer|developer|sde|programmer)\b/.test(t);
+}
+
 export function ghostSignals(job: NormalizedJob, now: Date) {
   const reasons: string[] = [];
   let score = 0;
@@ -125,7 +135,18 @@ export function tierFor(score: number): Tier {
   return 4;
 }
 
-export function scoreJob(job: NormalizedJob, profile: Profile = PROFILE, now = new Date()): ScoredJob {
+/** Registry reputation nudge (-5..+5) mapped onto 0..1, neutral at 0. */
+function scoreCompanySignal(signal: number | undefined): number {
+  if (signal === undefined) return 0.5;
+  return Math.max(0, Math.min(1, 0.5 + signal / 10));
+}
+
+export function scoreJob(
+  job: NormalizedJob,
+  profile: Profile = PROFILE,
+  now = new Date(),
+  companySignal?: number,
+): ScoredJob {
   const { matched, gaps, earned, possible } = matchSkills(job, profile);
 
   const norm = {
@@ -135,7 +156,7 @@ export function scoreJob(job: NormalizedJob, profile: Profile = PROFILE, now = n
     recency: scoreRecency(job, now),
     compensation: scoreCompensation(job, profile),
     titleRelevance: scoreTitleRelevance(job, profile),
-    companySignal: 0.5,
+    companySignal: scoreCompanySignal(companySignal),
   };
 
   const breakdown = Object.fromEntries(
@@ -146,6 +167,8 @@ export function scoreJob(job: NormalizedJob, profile: Profile = PROFILE, now = n
 
   let disqualified: string | undefined;
   if (norm.titleRelevance === 0) disqualified = 'title excluded (wrong discipline or seniority)';
+  // Sales, support and ops JDs mention SQL, AI tools and Agile too; the title decides the discipline.
+  else if (!isTitleCandidate(job.title, profile)) disqualified = 'not an engineering role';
   else if (norm.seniority === 0) disqualified = 'seniority below target';
   else if (norm.compensation === 0 && job.salaryInrLpaEquivalent !== undefined) {
     disqualified = `disclosed comp below floor (${job.salaryInrLpaEquivalent.toFixed(1)} LPA equiv)`;

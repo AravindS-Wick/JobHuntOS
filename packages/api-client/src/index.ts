@@ -151,6 +151,27 @@ export function createClient(opts: ClientOptions) {
       test: (body: import('@jobhunt/contracts').PlatformTestRequest) =>
         request<import('@jobhunt/contracts').PlatformTestResponse>('POST', '/connectors/test', body),
     },
+
+    facts: {
+      list: (q: import('@jobhunt/contracts').FactListQuery = {}) =>
+        request<import('@jobhunt/contracts').FactListResponse>('GET', `/facts${qs(q as Query)}`),
+      upsert: (body: import('@jobhunt/contracts').Fact) =>
+        request<import('@jobhunt/contracts').Fact>('POST', '/facts', body),
+      resolve: (body: import('@jobhunt/contracts').ResolveQuestionRequest) =>
+        request<import('@jobhunt/contracts').ResolveQuestionResponse>('POST', '/facts/resolve', body),
+    },
+
+    outreach: {
+      templates: () =>
+        request<{ templates: Record<string, { name: string; description: string; subjectTemplate: string; bodyTemplate: string }> }>(
+          'GET',
+          '/outreach/templates'
+        ),
+      generate: (body: import('@jobhunt/contracts').GenerateOutreachRequest) =>
+        request<import('@jobhunt/contracts').GenerateOutreachResponse>('POST', '/outreach/generate', body),
+      send: (body: import('@jobhunt/contracts').SendOutreachEmailRequest) =>
+        request<import('@jobhunt/contracts').SendOutreachEmailResponse>('POST', '/outreach/send', body),
+    },
   };
 }
 

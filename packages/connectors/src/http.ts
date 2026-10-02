@@ -6,10 +6,21 @@ export class HttpError extends Error {
 }
 
 const UA = 'jobhunt-os/0.1 (personal job search tool)';
+/** Some public job sites reject non-browser clients outright. */
+export const BROWSER_UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36';
 
-export interface FetchOpts { timeoutMs?: number; retries?: number; }
+export interface FetchOpts {
+  timeoutMs?: number;
+  retries?: number;
+  method?: 'GET' | 'POST';
+  body?: unknown;
+  headers?: Record<string, string>;
+  /** Send a desktop-browser user agent instead of identifying as jobhunt-os. */
+  browserUa?: boolean;
+}
 
-export async function getJson<T = unknown>(url: string, opts: FetchOpts = {}): Promise<T> {
+async function request(url: string, accept: string, opts: FetchOpts): Promise<Response> {
   const { timeoutMs = 20_000, retries = 2 } = opts;
   let lastErr: unknown;
 
@@ -17,23 +28,40 @@ export async function getJson<T = unknown>(url: string, opts: FetchOpts = {}): P
     const ac = new AbortController();
     const timer = setTimeout(() => ac.abort(), timeoutMs);
     try {
+      const headers: Record<string, string> = {
+        accept,
+        'user-agent': opts.browserUa ? BROWSER_UA : UA,
+        ...(opts.body !== undefined ? { 'content-type': 'application/json' } : {}),
+        ...opts.headers,
+      };
       const res = await fetch(url, {
+        method: opts.method ?? (opts.body !== undefined ? 'POST' : 'GET'),
         signal: ac.signal,
-        headers: { accept: 'application/json', 'user-agent': UA },
+        headers,
+        body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
       });
       if (res.status === 404) throw new HttpError(404, url, `Board not found: ${url}`);
       if (res.status === 429 || res.status >= 500) throw new HttpError(res.status, url);
       if (!res.ok) throw new HttpError(res.status, url);
-      return (await res.json()) as T;
+      return res;
     } catch (err) {
       lastErr = err;
-      if (err instanceof HttpError && err.status === 404) throw err;
+      // 4xx other than 429 won't change on retry.
+      if (err instanceof HttpError && err.status < 500 && err.status !== 429) throw err;
       if (attempt < retries) await sleep(600 * 2 ** attempt + Math.random() * 400);
     } finally {
       clearTimeout(timer);
     }
   }
   throw lastErr;
+}
+
+export async function getJson<T = unknown>(url: string, opts: FetchOpts = {}): Promise<T> {
+  return (await (await request(url, 'application/json', opts)).json()) as T;
+}
+
+export async function getText(url: string, opts: FetchOpts = {}): Promise<string> {
+  return (await request(url, 'text/html,application/xhtml+xml,*/*;q=0.8', opts)).text();
 }
 
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

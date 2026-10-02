@@ -1,0 +1,956 @@
+{
+ "jobSearchStatus": 200,
+ "jobSearchStatusText": "OK",
+ "jobSearchResponse": {
+  "data": [
+   {
+    "id": "69148699",
+    "jobId": 69148699,
+    "kiwiJobId": "153968369",
+    "kiwiCompanyId": "332466",
+    "kiwiRecruiterId": "1183900",
+    "title": "React Developer",
+    "locations": "Chennai, India",
+    "minimumExperience": {
+     "years": 7
+    },
+    "maximumExperience": {
+     "years": 10
+    },
+    "minimumSalary": {
+     "currency": "INR",
+     "absoluteValue": 0,
+     "absoluteMonthlyValue": 0
+    },
+    "maximumSalary": {
+     "currency": "INR",
+     "absoluteValue": 0,
+     "absoluteMonthlyValue": 0
+    },
+    "createdAt": 1790608302000,
+    "updatedAt": "4 days ago",
+    "industries": [
+     "Other"
+    ],
+    "functions": [
+     "Software Development"
+    ],
+    "jobTypes": [],
+    "employmentTypes": [
+     "Full time"
+    ],
+    "skills": "UI Component Development, REST API Integration, Responsive Web Application Development,Express.Js, Javascript, Node.js, react.js ",
+    "skillsWithSynonyms": [
+     {
+      "synonyms": [
+       "Express",
+       "Express JS",
+       "Express framework",
+       "Express.js",
+       "Express.js framework",
+       "ExpressJS",
+       "Node Express",
+       "Node.js Express",
+       "express javascript"
+      ],
+      "value": "express.js"
+     },
+     {
+      "synonyms": [
+       "JavaScript",
+       "JS",
+       "ECMAScript",
+       "ECMA Script",
+       "Java Script",
+       "Core Java Scripts",
+       "Core JS",
+       "Client-side JavaScript",
+       "Java Scripts",
+       "Java Scripting",
+       "ES",
+       "ECMA-262",
+       "Vanilla JS"
+      ],
+      "value": "javascript"
+     },
+     {
+      "synonyms": [
+       "REST API Integration",
+       "RESTful API Integration",
+       "REST Integration",
+       "REST Web Service Integration",
+       "RESTful Web Service Integration",
+       "REST Service Integration",
+       "RESTful Service Integration",
+       "REST API Consumption",
+       "RESTful API Consumption"
+      ],
+      "value": "rest api integration"
+     },
+     {
+      "synonyms": [
+       "Node.js",
+       "NodeJS",
+       "Node JS",
+       "Node",
+       "Node.js Runtime",
+       "node-js"
+      ],
+      "value": "node.js"
+     },
+     {
+      "synonyms": [
+       "Facebook React",
+       "React",
+       "React JS",
+       "React Library",
+       "React.js",
+       "ReactJS",
+       "ReactJS Library",
+       "Reacter",
+       "react js library",
+       "react native",
+       "react-js",
+       "reactnative"
+      ],
+      "value": "react.js"
+     }
+    ],
+    "recruiterId": 1380487,
+    "companyId": 332041,
+    "maximumSalaryINRFilter": 0,
+    "minimumSalaryINRFilter": 0,
+    "maximumSalaryINRMonthlyFilter": 0,
+    "minimumSalaryINRMonthlyFilter": 0,
+    "minimumExperienceFilter": 7,
+    "maximumExperienceFilter": 10,
+    "questionnaire": false,
+    "employerTypes": [
+     "Company"
+    ],
+    "walkInVenue": {},
+    "companyName": "Tata Consultancy Services",
+    "referenceCode": "8b9e3ce9d95e9a5505b807664084f7a9",
+    "status": 1,
+    "accountId": 0,
+    "currencyCode": "INR",
+    "hideSalary": 0,
+    "hideCompanyName": 0,
+    "autoMatch": 0,
+    "showContactDetails": 0,
+    "jobSource": "SCRAPPING",
+    "postingBoard": "SINGLE",
+    "graceJob": 0,
+    "quickJob": 0,
+    "jobFrom": "MOIN_APPCAST",
+    "isoCode": "en",
+    "recruiterName": "Tata Consultancy Services",
+    "channelId": 1,
+    "channelName": "India",
+    "isBold": 0,
+    "isJdLogo": 0,
+    "isSearchLogo": 0,
+    "siteContext": "rexmonster",
+    "freshness": 1788982257000,
+    "closedAt": 1791656940000,
+    "activeJob": true,
+    "isJobActive": true,
+    "isCJT": 0,
+    "isMicrosite": 0,
+    "redirectStage": 2,
+    "totalApplicants": 11,
+    "isGptwCompany": 0,
+    "jobSalaryConfidential": false,
+    "isUrgentlyHiring": false,
+    "quickApplyJob": 0,
+    "jobClassification": "SYNDICATE",
+    "isTestJob": false,
+    "jdUrl": "/job/react-developer-tata-consultancy-services-chennai-69148699",
+    "isSaved": false,
+    "isApplied": false,
+    "minimumSalaryFilter": 0,
+    "maximumSalaryFilter": 0,
+    "redirectUrl": "",
+    "exp": "7-10 Years",
+    "salary": "0-0 INR",
+    "postedBy": "22 days ago",
+    "isFresh": false,
+    "isHotJob": false,
+    "isSelected": false,
+    "isProfileComplete": false,
+    "lastUpdated": 1790605386000,
+    "seoJdUrl": "/job/react-developer-tata-consultancy-services-chennai-india-69148699",
+    "seoCompanyUrl": "/search/tata-consultancy-services-332041-jobs-career",
+    "order": 0
+   },
+   {
+    "id": "66465056",
+    "jobId": 66465056,
+    "kiwiJobId": "153986957",
+    "kiwiCompanyId": "244070",
+    "kiwiRecruiterId": "1542599",
+    "redirectUrl": "https://www2.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=lmjdnwstygivzwlr4davpil0fjeac503f5em529l58yp19ouif1l5b73opy9iwzs&from=COMP&id=29231861&SearchString=&StatesString=",
+    "title": "Senior React Developer",
+    "locations": "Chennai",
+    "minimumExperience": {
+     "years": 0
+    },
+    "maximumExperience": {
+     "years": 0
+    },
+    "minimumSalary": {
+     "currency": "INR",
+     "absoluteValue": 0,
+     "absoluteMonthlyValue": 0
+    },
+    "maximumSalary": {
+     "currency": "INR",
+     "absoluteValue": 0,
+     "absoluteMonthlyValue": 0
+    },
+    "createdAt": 1789030604000,
+    "updatedAt": "22 days ago",
+    "functions": [
+     "Software Development"
+    ],
+    "jobTypes": [
+     "Contract Job"
+    ],
+    "skills": "React Testing Library, JavaScript ES6, Context API, React Hooks, Vite, Functional Components, Zustand,Github, Redux, Css3, Asynchronous programming, Responsive Web Design, Html5, Restful Apis, react.js , Webpack, Jest",
+    "skillsWithSynonyms": [
+     {
+      "synonyms": [
+       "React Testing Library",
+       "@testing-library/react",
+       "react-testing-library",
+       "testing-library/react",
+       "RTL"
+      ],
+      "value": "react testing library"
+     },
+     {
+      "synonyms": [
+       "JavaScript ES6",
+       "ES6",
+       "ECMAScript 6",
+       "ECMAScript 2015",
+       "ES2015",
+       "JavaScript ES2015",
+       "JavaScript (ES6+)",
+       "ES6+ JavaScript",
+       "JavaScript ES6+",
+       "Modern JavaScript",
+       "ECMAScript 6+",
+       "ECMAScript 2015+",
+       "ES2015+",
+       "ES6 JavaScript",
+       "ES6+",
+       "ECMAScript 6th Edition",
+       "ECMA6",
+       "ECMA 6",
+       "ES 6",
+       "JS ES6"
+      ],
+      "value": "javascript es6"
+     },
+     {
+      "synonyms": [
+       "Git",
+       "Git / GitHub",
+       "Git Hub",
+       "Git SCM",
+       "Git/GitHub",
+       "GitHub",
+       "GitHub.com",
+       "gitlab",
+       "gitlab repo",
+       "gitlab runner",
+       "version control system"
+      ],
+      "value": "github"
+     },
+     {
+      "synonyms": [
+       "Context API",
+       "React Context API",
+       "React Context",
+       "ReactJS Context API",
+       "React.js Context API",
+       "Context API in React",
+       "React Contexts"
+      ],
+      "value": "context api"
+     },
+     {
+      "synonyms": [
+       "React Hooks",
+       "Hooks",
+       "ReactJS Hooks",
+       "React JS Hooks",
+       "React Hook",
+       "React.js Hooks",
+       "Hooks in React",
+       "React Functional Component Hooks"
+      ],
+      "value": "react hooks"
+     },
+     {
+      "synonyms": [
+       "Redux",
+       "Redux JS",
+       "Redux.js",
+       "ReduxJS",
+       "redux library"
+      ],
+      "value": "redux"
+     },
+     {
+      "synonyms": [
+       "Vite",
+       "Vite.js",
+       "ViteJS"
+      ],
+      "value": "vite"
+     },
+     {
+      "synonyms": [
+       "CSS",
+       "CSS 3",
+       "CSS Level 3",
+       "CSS Stylesheets",
+       "CSS3",
+       "Cascading Style Sheets",
+       "Cascading Style Sheets 3",
+       "Cascading Style Sheets Level 3",
+       "Style Sheets",
+       "Stylesheets",
+       "css language",
+       "css styling"
+      ],
+      "value": "css3"
+     },
+     {
+      "synonyms": [
+       "Asynchronous Programming",
+       "Async",
+       "Asynchronous",
+       "Async Programming",
+       "Asynchronous Processing",
+       "Asynchronous Execution",
+       "Asynchronous Coding",
+       "Async Coding",
+       "Async/Await Programming",
+       "Asynchronous Programming Model",
+       "Async Programming Model",
+       "Async Processing",
+       "Non-Blocking Programming",
+       "Nonblocking Programming"
+      ],
+      "value": "asynchronous programming"
+     },
+     {
+      "synonyms": [
+       "Responsive Web Design",
+       "Responsive Design",
+       "RWD",
+       "Mobile Responsive Design",
+       "Responsive UI Design",
+       "Responsive Layout Design",
+       "Responsive UI",
+       "Responsive User Interface",
+       "Responsive Web UI",
+       "Mobile Responsive UI",
+       "Mobile-Responsive UI",
+       "Responsive Website Design",
+       "Mobile-Responsive Web Design"
+      ],
+      "value": "responsive web design"
+     },
+     {
+      "synonyms": [
+       "HTML5",
+       "HTML",
+       "Hypertext Markup Language",
+       "Hyper Text Markup Language",
+       "HTML 5",
+       "HyperText Markup Language 5",
+       "HTML-5",
+       "HTML5 Development",
+       "HTML 5 Development",
+       "HTML5 Web Development",
+       "HTML5 App Development"
+      ],
+      "value": "html5"
+     },
+     {
+      "synonyms": [
+       "API Design and Integration",
+       "Design and Integrate REST APIs",
+       "Design and Integrate RESTful APIs",
+       "JSON REST APIs",
+       "JSON-based REST APIs",
+       "REST",
+       "REST API",
+       "REST API Design and Integration",
+       "REST APIs",
+       "REST JSON APIs",
+       "REST Services",
+       "REST Web API",
+       "REST Web Services",
+       "REST service",
+       "REST web service",
+       "REST-based APIs",
+       "REST-based Services",
+       "REST-based Web Services",
+       "REST/JSON APIs",
+       "RESTful",
+       "RESTful API",
+       "RESTful API Design and Integration",
+       "RESTful APIs",
+       "RESTful JSON APIs",
+       "RESTful Services",
+       "RESTful Web APIs",
+       "RESTful Web Services",
+       "RESTful service",
+       "RESTful web service",
+       "Representational State Transfer",
+       "Representational State Transfer (REST) APIs",
+       "Representational State Transfer API",
+       "Representational State Transfer APIs",
+       "http apis",
+       "restap",
+       "restapi",
+       "restfull",
+       "restfull api"
+      ],
+      "value": "restful apis"
+     },
+     {
+      "synonyms": [
+       "Facebook React",
+       "React",
+       "React JS",
+       "React Library",
+       "React.js",
+       "ReactJS",
+       "ReactJS Library",
+       "Reacter",
+       "react js library",
+       "react native",
+       "react-js",
+       "reactnative"
+      ],
+      "value": "react.js"
+     },
+     {
+      "synonyms": [
+       "Zustand",
+       "Zustand.js",
+       "Zustand JS",
+       "React Zustand",
+       "Zustand state management"
+      ],
+      "value": "zustand"
+     },
+     {
+      "synonyms": [
+       "Webpack",
+       "webpack.js",
+       "webpack js",
+       "webpackjs"
+      ],
+      "value": "webpack"
+     },
+     {
+      "synonyms": [
+       "Jest",
+       "JestJS",
+       "Jest JS",
+       "Jest.js",
+       "Jest framework",
+       "Jest testing framework",
+       "Facebook Jest",
+       "Meta Jest"
+      ],
+      "value": "jest"
+     }
+    ],
+    "recruiterId": 12998999,
+    "companyId": 243645,
+    "designations": [
+     "Software Engineer/Programmer"
+    ],
+    "maximumSalaryINRFilter": 0,
+    "minimumSalaryINRFilter": 0,
+    "maximumSalaryINRMonthlyFilter": 0,
+    "minimumSalaryINRMonthlyFilter": 0,
+    "minimumExperienceFilter": 0,
+    "maximumExperienceFilter": 0,
+    "questionnaire": false,
+    "employerTypes": [
+     "Consultant"
+    ],
+    "walkInVenue": {},
+    "companyName": "Aditi Tech Consulting Private Limited",
+    "referenceCode": "7c5b0c723b2ee2099d80a66e3dba843d",
+    "status": 1,
+    "accountId": 0,
+    "applyUrl": "https://www2.jobdiva.com/candidates/myjobs/openjob_outside.jsp?a=lmjdnwstygivzwlr4davpil0fjeac503f5em529l58yp19ouif1l5b73opy9iwzs&from=COMP&id=29231861&SearchString=&StatesString=",
+    "currencyCode": "INR",
+    "hideSalary": 0,
+    "companyLogoUrl": "https://media.monsterindia.com/logos/xaditistfinx/jdlogo.gif",
+    "hideCompanyName": 0,
+    "recruiterContactNumber": "8066107000",
+    "showContactDetails": 0,
+    "jobSource": "SCRAPPING",
+    "postingBoard": "SINGLE",
+    "graceJob": 0,
+    "quickJob": 0,
+    "jobFrom": "MOIN_MOHQ",
+    "isoCode": "en",
+    "recruiterName": "Aditi Tech Consulting Private Limited",
+    "channelId": 1,
+    "channelName": "India",
+    "isBold": 1,
+    "isJdLogo": 1,
+    "isSearchLogo": 1,
+    "siteContext": "rexmonster",
+    "freshness": 1789030604000,
+    "closedAt": 1792846800000,
+    "activeJob": true,
+    "isJobActive": true,
+    "isCJT": 0,
+    "isMicrosite": 0,
+    "redirectStage": 0,
+    "totalApplicants": 39,
+    "isGptwCompany": 0,
+    "jobSalaryConfidential": false,
+    "isUrgentlyHiring": false,
+    "quickApplyJob": 0,
+    "jobClassification": "SYNDICATE_EC",
+    "isMarquee": 0,
+    "isTestJob": false,
+    "jdUrl": "/job/senior-react-developer-aditi-tech-consulting-private-limited-chennai-66465056",
+    "isSaved": false,
+    "isApplied": false,
+    "minimumSalaryFilter": 0,
+    "maximumSalaryFilter": 0,
+    "companyLogo": "https://media.monsterindia.com/logos/xaditistfinx/jdlogo.gif",
+    "exp": "",
+    "salary": "0-0 INR",
+    "postedBy": "22 days ago",
+    "isFresh": false,
+    "isHotJob": false,
+    "isSelected": false,
+    "isProfileComplete": false,
+    "lastUpdated": 1789050404000,
+    "seoJdUrl": "/job/senior-react-developer-aditi-tech-consulting-private-limited-chennai-66465056",
+    "seoCompanyUrl": "/search/aditi-tech-consulting-private-limited-243645-jobs-career",
+    "order": 1
+   },
+   {
+    "id": "67377029",
+    "jobId": 67377029,
+    "kiwiJobId": "154210285",
+    "kiwiCompanyId": "147280",
+    "kiwiRecruiterId": "1579181",
+    "title": "Senior React Developer",
+    "locations": "Chennai, India",
+    "minimumExperience": {
+     "years": 12
+    },
+    "maximumExperience": {
+     "years": 14
+    },
+    "minimumSalary": {
+     "currency": "INR",
+     "absoluteValue": 0,
+     "absoluteMonthlyValue": 0
+    },
+    "maximumSalary": {
+     "currency": "INR",
+     "absoluteValue": 0,
+     "absoluteMonthlyValue": 0
+    },
+    "createdAt": 1789579970000,
+    "updatedAt": "16 days ago",
+    "industries": [
+     "Other"
+    ],
+    "functions": [
+     "Frontend Development"
+    ],
+    "jobTypes": [],
+    "employmentTypes": [
+     "Full time"
+    ],
+    "skills": "Babel, Tailwind CSS, Vite, Next.js,Redux, React Context API, Css3, Git, Javascript, Html5, Asynchronous programming, Restful Apis, react.js , Webpack",
+    "skillsWithSynonyms": [
+     {
+      "synonyms": [
+       "Babel",
+       "Babel.js",
+       "Babel JS",
+       "Babeljs",
+       "@babel/core"
+      ],
+      "value": "babel"
+     },
+     {
+      "synonyms": [
+       "Redux",
+       "Redux JS",
+       "Redux.js",
+       "ReduxJS",
+       "redux library"
+      ],
+      "value": "redux"
+     },
+     {
+      "synonyms": [
+       "React Context API",
+       "Context API",
+       "React Context",
+       "ReactJS Context API",
+       "React.js Context API",
+       "Context API in React",
+       "React Contexts"
+      ],
+      "value": "react context api"
+     },
+     {
+      "synonyms": [
+       "Tailwind CSS",
+       "Tailwind",
+       "TailwindCSS",
+       "Tailwind CSS Framework"
+      ],
+      "value": "tailwind css"
+     },
+     {
+      "synonyms": [
+       "Vite",
+       "Vite.js",
+       "ViteJS"
+      ],
+      "value": "vite"
+     },
+     {
+      "synonyms": [
+       "CSS",
+       "CSS 3",
+       "CSS Level 3",
+       "CSS Stylesheets",
+       "CSS3",
+       "Cascading Style Sheets",
+       "Cascading Style Sheets 3",
+       "Cascading Style Sheets Level 3",
+       "Style Sheets",
+       "Stylesheets",
+       "css language",
+       "css styling"
+      ],
+      "value": "css3"
+     },
+     {
+      "synonyms": [
+       "Git",
+       "Git / GitHub",
+       "Git SCM",
+       "Git Source Control",
+       "Git VCS",
+       "Git Version Control",
+       "Git Versioning",
+       "Git/GitHub",
+       "GitHub",
+       "git-scm",
+       "gitlab",
+       "gitlab repo",
+       "gitlab runner",
+       "version control system"
+      ],
+      "value": "git"
+     },
+     {
+      "synonyms": [
+       "JavaScript",
+       "JS",
+       "ECMAScript",
+       "ECMA Script",
+       "Java Script",
+       "Core Java Scripts",
+       "Core JS",
+       "Client-side JavaScript",
+       "Java Scripts",
+       "Java Scripting",
+       "ES",
+       "ECMA-262",
+       "Vanilla JS"
+      ],
+      "value": "javascript"
+     },
+     {
+      "synonyms": [
+       "Next.js",
+       "NextJS",
+       "Next JS",
+       "Next.js framework"
+      ],
+      "value": "next.js"
+     },
+     {
+      "synonyms": [
+       "HTML5",
+       "HTML",
+       "Hypertext Markup Language",
+       "Hyper Text Markup Language",
+       "HTML 5",
+       "HyperText Markup Language 5",
+       "HTML-5",
+       "HTML5 Development",
+       "HTML 5 Development",
+       "HTML5 Web Development",
+       "HTML5 App Development"
+      ],
+      "value": "html5"
+     },
+     {
+      "synonyms": [
+       "Asynchronous Programming",
+       "Async",
+       "Asynchronous",
+       "Async Programming",
+       "Asynchronous Processing",
+       "Asynchronous Execution",
+       "Asynchronous Coding",
+       "Async Coding",
+       "Async/Await Programming",
+       "Asynchronous Programming Model",
+       "Async Programming Model",
+       "Async Processing",
+       "Non-Blocking Programming",
+       "Nonblocking Programming"
+      ],
+      "value": "asynchronous programming"
+     },
+     {
+      "synonyms": [
+       "API Design and Integration",
+       "Design and Integrate REST APIs",
+       "Design and Integrate RESTful APIs",
+       "JSON REST APIs",
+       "JSON-based REST APIs",
+       "REST",
+       "REST API",
+       "REST API Design and Integration",
+       "REST APIs",
+       "REST JSON APIs",
+       "REST Services",
+       "REST Web API",
+       "REST Web Services",
+       "REST service",
+       "REST web service",
+       "REST-based APIs",
+       "REST-based Services",
+       "REST-based Web Services",
+       "REST/JSON APIs",
+       "RESTful",
+       "RESTful API",
+       "RESTful API Design and Integration",
+       "RESTful APIs",
+       "RESTful JSON APIs",
+       "RESTful Services",
+       "RESTful Web APIs",
+       "RESTful Web Services",
+       "RESTful service",
+       "RESTful web service",
+       "Representational State Transfer",
+       "Representational State Transfer (REST) APIs",
+       "Representational State Transfer API",
+       "Representational State Transfer APIs",
+       "http apis",
+       "restap",
+       "restapi",
+       "restfull",
+       "restfull api"
+      ],
+      "value": "restful apis"
+     },
+     {
+      "synonyms": [
+       "Facebook React",
+       "React",
+       "React JS",
+       "React Library",
+       "React.js",
+       "ReactJS",
+       "ReactJS Library",
+       "Reacter",
+       "react js library",
+       "react native",
+       "react-js",
+       "reactnative"
+      ],
+      "value": "react.js"
+     },
+     {
+      "synonyms": [
+       "Webpack",
+       "webpack.js",
+       "webpack js",
+       "webpackjs"
+      ],
+      "value": "webpack"
+     }
+    ],
+    "recruiterId": 43030875,
+    "companyId": 146855,
+    "maximumSalaryINRFilter": 0,
+    "minimumSalaryINRFilter": 0,
+    "maximumSalaryINRMonthlyFilter": 0,
+    "minimumSalaryINRMonthlyFilter": 0,
+    "minimumExperienceFilter": 12,
+    "maximumExperienceFilter": 14,
+    "questionnaire": false,
+    "employerTypes": [
+     "Consultant"
+    ],
+    "walkInVenue": {},
+    "companyName": "ascendion",
+    "referenceCode": "2b544e02f79aa022b0fa1f12efef9f0c",
+    "status": 1,
+    "accountId": 0,
+    "currencyCode": "INR",
+    "hideSalary": 0,
+    "companyLogoUrl": "https://media.monsterindia.com/logos/xcsphx/jdlogo.gif",
+    "hideCompanyName": 0,
+    "autoMatch": 0,
+    "showContactDetails": 0,
+    "jobSource": "SCRAPPING",
+    "postingBoard": "SINGLE",
+    "graceJob": 0,
+    "quickJob": 0,
+    "jobFrom": "MOIN_OPERIA",
+    "isoCode": "en",
+    "recruiterName": "Ascendion",
+    "channelId": 1,
+    "channelName": "India",
+    "isBold": 0,
+    "isJdLogo": 0,
+    "isSearchLogo": 0,
+    "siteContext": "rexmonster",
+    "freshness": 1789579970000,
+    "closedAt": 1792089000000,
+    "activeJob": true,
+    "isJobActive": true,
+    "isCJT": 0,
+    "isMicrosite": 0,
+    "cjtExpiryDate": "2021-07-01",
+    "redirectStage": 2,
+    "totalApplicants": 21,
+    "isGptwCompany": 0,
+    "jobSalaryConfidential": false,
+    "isUrgentlyHiring": false,
+    "quickApplyJob": 0,
+    "jobClassification": "SYNDICATE_EC",
+    "isTestJob": false,
+    "jdUrl": "/job/senior-react-developer-ascendion-chennai-67377029",
+    "isSaved": false,
+    "isApplied": false,
+    "minimumSalaryFilter": 0,
+    "maximumSalaryFilter": 0,
+    "redirectUrl": "",
+    "companyLogo": "https://media.monsterindia.com/logos/xcsphx/jdlogo.gif",
+    "exp": "12-14 Years",
+    "salary": "0-0 INR",
+    "postedBy": "15 days ago",
+    "isFresh": false,
+    "isHotJob": false,
+    "isSelected": false,
+    "isProfileComplete": false,
+    "lastUpdated": 1789579970000,
+    "seoJdUrl": "/job/senior-react-developer-ascendion-chennai-india-67377029",
+    "seoCompanyUrl": "/search/ascendion-146855-jobs-career",
+    "order": 2
+   }
+  ],
+  "meta": {
+   "paging": {
+    "cursors": {
+     "next": "5",
+     "previous": "0"
+    },
+    "total": 45,
+    "limit": 5
+   },
+   "resultId": "7329d078-7736-488e-abb3-e1f836c36db8",
+   "searchId": "609de641962233f363230a6fc4656ec2",
+   "version": "DEFAULT",
+   "buildVersion": "0.0.1"
+  },
+  "spellCheckApplied": false,
+  "filters": {},
+  "selectedFilters": {},
+  "filterLabels": {
+   "functions": "Function",
+   "roles": "Role",
+   "experienceRanges": "Experience (in years)",
+   "jobCities": "City",
+   "salaryRanges": "Salary (INR)",
+   "isGptwCompany": "Great Place to Work",
+   "jobCountries": "Country",
+   "qualifications": "Qualification",
+   "employerTypes": "Employer Type",
+   "companies": "Top Companies",
+   "jobStates": "State",
+   "industries": "Industry",
+   "jobFreshness": "Job Freshness",
+   "locations": "Location",
+   "jobTypes": "Job Type"
+  },
+  "spellCheck": {
+   "originalText": "react developer",
+   "suggestion": "",
+   "showingResultsFor": "react developer"
+  },
+  "apiId": "DEFAULT",
+  "IS_NEW_SEARCH_PAGE": "true"
+ },
+ "userProfilesStatus": "",
+ "userProfilesStatusText": "",
+ "userProfilesResponse": "",
+ "seoSrpTupleStatus": "",
+ "seoSrpTupleStatusText": "",
+ "seoSrpTupleResponse": "",
+ "seoSrpTupleV2Response": "",
+ "similarSkillsStatus": 200,
+ "similarSkillsStatusText": "OK",
+ "similarSkillsResponse": {
+  "data": []
+ },
+ "topLocationsResponse": [
+  "India",
+  "Kolkata",
+  "Bangalore",
+  "Noida",
+  "Hyderabad",
+  "Delhi",
+  "Mumbai",
+  "Chennai",
+  "Gurgaon",
+  "Pune"
+ ],
+ "similarJobsStatus": "",
+ "similarJobsStatusText": "",
+ "similarJobsStatusResponse": "",
+ "SEARCH_URL": "",
+ "reqParams": {
+  "srpSearchObject": "?sort=1&limit=5&query=react%20developer&locations=chennai&",
+  "decodedParam": {
+   "sort": "1",
+   "limit": "5",
+   "query": "react developer",
+   "locations": "chennai"
+  }
+ }
+}

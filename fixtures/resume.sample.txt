@@ -1,0 +1,38 @@
+Sample Candidate
+Senior Full Stack Engineer
+sample.candidate@example.com | +91 90000 00000 | linkedin.com/in/sample-candidate | github.com/sample-candidate
+
+SUMMARY
+Full stack engineer with 5 years building React and Node.js products on GCP.
+
+SKILLS
+Frontend: React, TypeScript, Redux, Next.js, Tailwind
+Backend: Node.js, Express, Python, Flask, REST API
+Cloud & Tools: GCP, Cloud Run, Docker, GitHub Actions, PostgreSQL
+
+EXPERIENCE
+Senior Software Engineer | Example Corp | Jan 2023 – Present
+• Led migration of a legacy AngularJS dashboard to React and TypeScript, cutting page load time by 40%
+• Built a Node.js and Express API gateway serving 2M requests per day on Cloud Run
+• Mentored 4 engineers and introduced code review guidelines
+• Set up GitHub Actions CI/CD with Docker images, reducing release time from 2 days to 2 hours
+• Wrote Python Flask services for internal reporting
+• Organised quarterly hackathons
+• Improved accessibility of the design system to WCAG AA
+
+Software Engineer | Demo Labs | Jul 2020 – Dec 2022
+• Developed React and Redux features for a B2B analytics product used by 300 customers
+• Designed PostgreSQL schemas and REST APIs for billing
+• Wrote Jest unit tests raising coverage from 35% to 80%
+
+PROJECTS
+Job Tracker (React, Node.js, PostgreSQL)
+• Personal tool to track applications with a Kanban board
+Recipe Bot (Python, Flask)
+• Chatbot that suggests recipes from pantry items
+
+EDUCATION
+B.E. Computer Science, Example Institute of Technology | 2016 – 2020
+
+CERTIFICATIONS
+Google Cloud Associate Cloud Engineer

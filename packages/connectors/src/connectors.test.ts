@@ -61,7 +61,7 @@ describe('detectAts', () => {
     ['https://job-boards.greenhouse.io/postman/jobs/123', 'greenhouse', 'postman'],
     ['https://jobs.lever.co/palantir/abc', 'lever', 'palantir'],
     ['https://jobs.ashbyhq.com/openai/xyz', 'ashby', 'openai'],
-    ['https://freshworks.wd1.myworkdayjobs.com/en-US/Freshworks/job/X', 'workday', 'freshworks'],
+    ['https://freshworks.wd1.myworkdayjobs.com/en-US/Freshworks/job/X', 'workday', 'freshworks/wd1/Freshworks'],
     ['https://example.com/careers', 'unknown', null],
   ];
   for (const [url, ats, token] of cases) {

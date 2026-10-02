@@ -1,7 +1,15 @@
 import type { RawJob } from '@jobhunt/core';
-import { safeFetchText, safeFetchJson } from './http.js';
 import { stripHtml } from './html.js';
+import { parseRelativeAge, slugify, toDate } from './util.js';
 
+/**
+ * Indeed.
+ *
+ * Indeed retired its public RSS feeds (in.indeed.com/rss returns 404, verified
+ * 2026-10-02) and blocks direct search requests, so jobs come from the local
+ * browser worker, which reads the job-card JSON Indeed embeds in its search
+ * page (`window.mosaic.providerData["mosaic-provider-jobcards"]`).
+ */
 export interface IndeedSearchOptions {
   query: string;
   location?: string;
@@ -9,145 +17,109 @@ export interface IndeedSearchOptions {
   limit?: number;
 }
 
-/**
- * Parse Indeed RSS XML feed into canonical RawJob format.
- */
-export function parseIndeedRss(xmlText: string): RawJob[] {
-  const jobs: RawJob[] = [];
-  if (!xmlText || typeof xmlText !== 'string') return jobs;
+export const indeedSearchPageUrl = (o: IndeedSearchOptions) => {
+  const host = o.country === 'in' || !o.country ? 'in.indeed.com' : o.country === 'us' ? 'www.indeed.com' : `${o.country}.indeed.com`;
+  return `https://${host}/jobs?${new URLSearchParams({ q: o.query, l: o.location ?? '', sort: 'date', fromage: '7' })}`;
+};
 
-  const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
-  let match: RegExpExecArray | null;
-
-  while ((match = itemRegex.exec(xmlText)) !== null) {
-    const itemContent = match[1] ?? '';
-
-    // Title
-    const titleMatch = /<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i.exec(itemContent);
-    const rawTitle = titleMatch ? titleMatch[1] ?? '' : '';
-
-    // Link
-    const linkMatch = /<link>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/link>/i.exec(itemContent);
-    const link = linkMatch ? (linkMatch[1] ?? '').trim() : '';
-
-    // GUID / Source ID
-    const guidMatch = /<guid[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/guid>/i.exec(itemContent);
-    const guid = guidMatch ? (guidMatch[1] ?? '').trim() : link;
-
-    // Description
-    const descMatch = /<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/i.exec(itemContent);
-    const desc = descMatch ? stripHtml(descMatch[1] ?? '').trim() : '';
-
-    // PubDate
-    const pubDateMatch = /<pubDate>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/pubDate>/i.exec(itemContent);
-    let postedAt: Date | undefined;
-    if (pubDateMatch && pubDateMatch[1]) {
-      const parsed = new Date(pubDateMatch[1]);
-      if (!isNaN(parsed.getTime())) postedAt = parsed;
-    }
-
-    // Source (Company name is often in <source> or part of title "Title - Company - Location")
-    const sourceMatch = /<source[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/source>/i.exec(itemContent);
-    let company = sourceMatch ? stripHtml(sourceMatch[1] ?? '').trim() : '';
-
-    let cleanTitle = stripHtml(rawTitle).trim();
-    if (!company && cleanTitle.includes(' - ')) {
-      const parts = cleanTitle.split(' - ');
-      if (parts.length >= 2) {
-        cleanTitle = parts[0]!.trim();
-        company = parts[1]!.trim();
-      }
-    }
-
-    if (!company) company = 'Indeed Employer';
-
-    // Location extraction from description or title
-    let location = 'India';
-    const locMatch = /location[:\s]+([^<\n]+)/i.exec(desc) || /in\s+([A-Za-z\s,]+)$/i.exec(cleanTitle);
-    if (locMatch && locMatch[1]) {
-      location = locMatch[1].trim();
-    }
-
-    if (cleanTitle && link) {
-      jobs.push({
-        source: 'indeed',
-        sourceId: guid || link,
-        company,
-        companySlug: company.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        title: cleanTitle,
-        url: link,
-        applyUrl: link,
-        locationRaw: location,
-        descriptionText: desc || `${cleanTitle} at ${company}`,
-        postedAt: postedAt || new Date(),
-      });
-    }
-  }
-
-  return jobs;
+/** Parse `mosaic-provider-jobcards` results (as captured by the browser worker). */
+export function parseIndeedMosaic(results: unknown[], host = 'in.indeed.com', now = new Date()): RawJob[] {
+  if (!Array.isArray(results)) return [];
+  return results.flatMap((r): RawJob[] => {
+    if (!r || typeof r !== 'object') return [];
+    const it = r as Record<string, any>;
+    const jobKey = it.jobkey || it.jobKey;
+    const title = it.displayTitle || it.title;
+    const company = it.company || it.truncatedCompany;
+    if (!jobKey || !title || !company) return [];
+    const url = `https://${host}/viewjob?jk=${jobKey}`;
+    const snippet = stripHtml(it.snippet ?? '');
+    const attributes = Array.isArray(it.taxonomyAttributes)
+      ? it.taxonomyAttributes.flatMap((a: any) => (a?.attributes ?? []).map((x: any) => x?.label)).filter(Boolean)
+      : [];
+    return [{
+      source: 'indeed',
+      sourceId: String(jobKey),
+      company,
+      companySlug: slugify(company),
+      title,
+      url,
+      applyUrl: url,
+      locationRaw: it.formattedLocation || it.jobLocationCity || '',
+      descriptionText: [snippet, attributes.length ? `Attributes: ${attributes.join(', ')}` : ''].filter(Boolean).join('\n'),
+      compensationRaw: it.salarySnippet?.text || it.extractedSalary?.text || undefined,
+      workplaceTypeRaw: it.remoteLocation ? 'remote' : undefined,
+      postedAt: toDate(it.pubDate) ?? parseRelativeAge(it.formattedRelativeTime, now),
+    }];
+  });
 }
 
-/**
- * Parse Indeed JSON results (from MCP, API or rapidapi wrappers).
- */
+/** Parse Indeed JSON results from MCP / API wrappers. */
 export function parseIndeedJson(data: unknown): RawJob[] {
   if (!data || typeof data !== 'object') return [];
   const payload = data as Record<string, any>;
   const list = payload.results || payload.data || payload.jobs || (Array.isArray(payload) ? payload : []);
-  const jobs: RawJob[] = [];
-
-  for (const item of list) {
-    if (!item || typeof item !== 'object') continue;
+  return (list as unknown[]).flatMap((item): RawJob[] => {
+    if (!item || typeof item !== 'object') return [];
     const it = item as Record<string, any>;
     const title = it.jobTitle || it.title || '';
-    const company = it.company || it.companyName || '';
-    const id = String(it.jobKey || it.id || it.key || it.link || '');
-    if (!title) continue;
-
-    const compName = company || 'Indeed Employer';
+    const id = String(it.jobKey || it.id || it.key || '');
     const url = it.link || it.url || (id ? `https://www.indeed.com/viewjob?jk=${id}` : '');
-
-    jobs.push({
+    if (!title || !url) return [];
+    const company = it.company || it.companyName || 'Unknown employer';
+    return [{
       source: 'indeed',
       sourceId: id || url,
-      company: compName,
-      companySlug: compName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      company,
+      companySlug: slugify(company),
       title,
-      url: url || `https://www.indeed.com/jobs?q=${encodeURIComponent(title)}`,
+      url,
       applyUrl: it.applyUrl || url,
-      locationRaw: it.location || it.formattedLocation || 'India',
-      descriptionText: stripHtml(it.snippet || it.description || `${title} at ${compName}`),
-      postedAt: it.date ? new Date(it.date) : new Date(),
+      locationRaw: it.location || it.formattedLocation || '',
+      descriptionText: stripHtml(it.snippet || it.description || ''),
+      postedAt: toDate(it.date),
       compensationRaw: it.salary || it.estimatedSalary,
+    }];
+  });
+}
+
+/** Kept for archived feeds and tests; Indeed's live RSS endpoint is gone. */
+export function parseIndeedRss(xmlText: string): RawJob[] {
+  const jobs: RawJob[] = [];
+  if (!xmlText || typeof xmlText !== 'string') return jobs;
+  const tag = (s: string, name: string) =>
+    new RegExp(`<${name}[^>]*>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?</${name}>`, 'i').exec(s)?.[1]?.trim() ?? '';
+
+  for (const m of xmlText.matchAll(/<item>([\s\S]*?)<\/item>/gi)) {
+    const item = m[1] ?? '';
+    const link = tag(item, 'link');
+    let title = stripHtml(tag(item, 'title'));
+    let company = stripHtml(tag(item, 'source'));
+    if (!company && title.includes(' - ')) {
+      const parts = title.split(' - ');
+      title = parts[0]!.trim();
+      company = parts[1]?.trim() ?? '';
+    } else if (company && title.endsWith(` - ${company}`)) {
+      title = title.slice(0, -(company.length + 3)).trim();
+    }
+    if (!title || !link || !company) continue;
+    const desc = stripHtml(tag(item, 'description'));
+    jobs.push({
+      source: 'indeed',
+      sourceId: tag(item, 'guid') || link,
+      company,
+      companySlug: slugify(company),
+      title,
+      url: link,
+      applyUrl: link,
+      locationRaw: /location[:\s]+([^.\n]+)/i.exec(desc)?.[1]?.trim() ?? '',
+      descriptionText: desc,
+      postedAt: toDate(tag(item, 'pubDate')),
     });
   }
-
   return jobs;
 }
 
-/**
- * Fetch jobs from Indeed public RSS feeds.
- */
-export async function fetchIndeedJobs(opts: IndeedSearchOptions): Promise<RawJob[]> {
-  const { query, location = 'India', country = 'in', limit = 25 } = opts;
-
-  const domain = country === 'in' ? 'in.indeed.com' : 'www.indeed.com';
-  const url = `https://${domain}/rss?q=${encodeURIComponent(query)}&l=${encodeURIComponent(location)}&limit=${limit}&sort=date`;
-
-  try {
-    const xml = await safeFetchText(url, {
-      headers: {
-        'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        Accept: 'application/rss+xml,application/xml,text/xml;q=0.9,*/*;q=0.8',
-      },
-    });
-
-    const jobs = parseIndeedRss(xml);
-    if (jobs.length > 0) return jobs;
-  } catch (err) {
-    console.warn(`Indeed RSS fetch error (${url}):`, err);
-  }
-
-  return [];
+export async function fetchIndeedJobs(_opts: IndeedSearchOptions): Promise<RawJob[]> {
+  throw new Error('Indeed blocks direct requests and retired its RSS feed. Run it through the local browser worker.');
 }

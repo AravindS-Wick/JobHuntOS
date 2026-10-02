@@ -1,7 +1,16 @@
 import type { RawJob } from '@jobhunt/core';
-import { safeFetchJson, safeFetchText } from './http.js';
 import { stripHtml } from './html.js';
+import { slugify, stableId, toDate } from './util.js';
 
+/**
+ * Naukri.
+ *
+ * Naukri's search API answers direct requests with `406 recaptcha required`
+ * (verified 2026-10-02), so there is no server-side fetch here. The local
+ * browser worker opens the search page in the user's own Chrome profile and
+ * captures the same `jobapi/v3/search` JSON the page loads; that JSON goes
+ * through `parseNaukriPayload` below.
+ */
 export interface NaukriSearchOptions {
   query: string;
   location?: string;
@@ -10,9 +19,14 @@ export interface NaukriSearchOptions {
   apifyToken?: string;
 }
 
-/**
- * Parse Naukri Job API v3 or embedded search JSON structure.
- */
+export const naukriSearchPageUrl = (o: NaukriSearchOptions) => {
+  const kw = slugify(o.query);
+  const loc = o.location ? `-in-${slugify(o.location.split(',')[0] ?? '')}` : '';
+  const exp = o.experience !== undefined ? `&experience=${o.experience}` : '';
+  return `https://www.naukri.com/${kw}-jobs${loc}?k=${encodeURIComponent(o.query)}${o.location ? `&l=${encodeURIComponent(o.location)}` : ''}${exp}`;
+};
+
+/** Parse Naukri's jobapi/v3 search JSON (as captured by the browser worker). */
 export function parseNaukriPayload(data: unknown): RawJob[] {
   if (!data || typeof data !== 'object') return [];
   const payload = data as Record<string, any>;
@@ -23,148 +37,91 @@ export function parseNaukriPayload(data: unknown): RawJob[] {
     if (!item || typeof item !== 'object') continue;
     const title = item.title || item.jobTitle || '';
     const company = item.companyName || item.company || '';
-    const jobId = String(item.jobId || item.id || item.groupId || '');
     if (!title || !company) continue;
 
-    // Location parsing
-    let location = 'India';
-    if (Array.isArray(item.placeholders)) {
-      const locPlaceholder = item.placeholders.find((p: any) => p.type === 'location');
-      if (locPlaceholder?.label) location = locPlaceholder.label;
-    } else if (item.location) {
-      location = typeof item.location === 'string' ? item.location : (item.location.label || 'India');
-    }
-
-    // Salary parsing
+    let location = '';
     let salaryRaw: string | undefined;
+    let experience: string | undefined;
     if (Array.isArray(item.placeholders)) {
-      const salaryPlaceholder = item.placeholders.find((p: any) => p.type === 'salary');
-      if (salaryPlaceholder?.label && !salaryPlaceholder.label.toLowerCase().includes('not disclosed')) {
-        salaryRaw = salaryPlaceholder.label;
+      for (const p of item.placeholders) {
+        if (p?.type === 'location' && p.label) location = p.label;
+        if (p?.type === 'salary' && p.label && !/not disclosed/i.test(p.label)) salaryRaw = p.label;
+        if (p?.type === 'experience' && p.label) experience = p.label;
       }
-    } else if (item.salary) {
-      salaryRaw = typeof item.salary === 'string' ? item.salary : item.salary.label;
+    } else {
+      if (item.location) location = typeof item.location === 'string' ? item.location : (item.location.label ?? '');
+      if (item.salary) salaryRaw = typeof item.salary === 'string' ? item.salary : item.salary.label;
     }
 
-    // URL
     const url = item.jdURL
-      ? (item.jdURL.startsWith('http') ? item.jdURL : `https://www.naukri.com${item.jdURL}`)
-      : `https://www.naukri.com/job-listings-${jobId}`;
+      ? (String(item.jdURL).startsWith('http') ? item.jdURL : `https://www.naukri.com${item.jdURL}`)
+      : '';
+    const jobId = String(item.jobId || item.id || item.groupId || '') || (url ? stableId(url) : '');
+    if (!jobId) continue;
 
-    // Description & tags
-    const tags = Array.isArray(item.tagsAndSkills) ? item.tagsAndSkills.map((t: any) => (typeof t === 'string' ? t : t.label || t)).join(', ') : '';
-    const desc = item.jobDescription || item.description || tags || `${title} at ${company}. Experience: ${item.experience || '3-8 yrs'}`;
-
-    // Date
-    let postedAt: Date | undefined;
-    if (item.createdDate) {
-      const parsed = new Date(item.createdDate);
-      if (!isNaN(parsed.getTime())) postedAt = parsed;
-    }
+    const tags = Array.isArray(item.tagsAndSkills)
+      ? item.tagsAndSkills.map((t: any) => (typeof t === 'string' ? t : t.label || '')).join(', ')
+      : typeof item.tagsAndSkills === 'string' ? item.tagsAndSkills : '';
+    const desc = [
+      item.jobDescription || item.description || '',
+      tags && `Skills: ${tags}`,
+      experience && `Experience: ${experience}`,
+    ].filter(Boolean).join('\n');
 
     jobs.push({
       source: 'naukri',
-      sourceId: jobId || url,
+      sourceId: jobId,
       company,
-      companySlug: company.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      companySlug: slugify(company),
       title,
-      url,
-      applyUrl: url,
+      url: url || `https://www.naukri.com/job-listings-${jobId}`,
+      applyUrl: url || undefined,
       locationRaw: location,
       descriptionText: stripHtml(desc),
       compensationRaw: salaryRaw,
-      postedAt: postedAt || new Date(),
+      postedAt: toDate(item.createdDate ?? item.footerPlaceholderLabel),
     });
   }
-
   return jobs;
 }
 
-/**
- * Parse Apify Naukri Scraper output (e.g. muhammetakkurtt/naukri-job-scraper).
- */
+/** Apify actor output (e.g. muhammetakkurtt/naukri-job-scraper). */
 export function parseNaukriApify(items: unknown[]): RawJob[] {
   if (!Array.isArray(items)) return [];
-  const jobs: RawJob[] = [];
-
-  for (const item of items) {
-    if (!item || typeof item !== 'object') continue;
+  return items.flatMap((item): RawJob[] => {
+    if (!item || typeof item !== 'object') return [];
     const it = item as Record<string, any>;
     const title = it.title || it.jobTitle || '';
     const company = it.company || it.companyName || '';
-    const id = String(it.jobId || it.id || it.url || '');
-    if (!title || !company) continue;
-
-    const url = it.url || it.applyUrl || `https://www.naukri.com/job-listings-${id}`;
-
-    jobs.push({
+    const url = it.url || it.applyUrl || '';
+    const id = String(it.jobId || it.id || '') || (url ? stableId(url) : '');
+    if (!title || !company || !id) return [];
+    return [{
       source: 'naukri',
-      sourceId: id || url,
+      sourceId: id,
       company,
-      companySlug: company.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      companySlug: slugify(company),
       title,
-      url,
-      applyUrl: url,
-      locationRaw: it.location || 'India',
-      descriptionText: stripHtml(it.jobDescription || it.description || it.skills?.join(', ') || `${title} at ${company}`),
+      url: url || `https://www.naukri.com/job-listings-${id}`,
+      applyUrl: url || undefined,
+      locationRaw: it.location || '',
+      descriptionText: stripHtml(it.jobDescription || it.description || (it.skills ?? []).join(', ')),
       compensationRaw: it.salary || it.salaryPackage,
-      postedAt: it.postedAt ? new Date(it.postedAt) : new Date(),
-    });
-  }
-
-  return jobs;
+      postedAt: toDate(it.postedAt),
+    }];
+  });
 }
 
-/**
- * Fetch Naukri jobs via search API or Apify actor fallback.
- */
+/** Server-side Naukri is only possible through a paid Apify actor; otherwise use the browser worker. */
 export async function fetchNaukriJobs(opts: NaukriSearchOptions): Promise<RawJob[]> {
-  const { query, location = 'Chennai, Bangalore, Remote', experience, limit = 20, apifyToken } = opts;
-
-  // 1. Apify actor fallback
-  if (apifyToken) {
-    try {
-      const apifyUrl = `https://api.apify.com/v2/acts/muhammetakkurtt~naukri-job-scraper/run-sync-get-dataset-items?token=${apifyToken}`;
-      const apifyRes = await safeFetchJson<unknown[]>(apifyUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          keyword: query,
-          location,
-          maxJobs: limit,
-        }),
-      });
-      if (Array.isArray(apifyRes)) {
-        const parsed = parseNaukriApify(apifyRes);
-        if (parsed.length > 0) return parsed;
-      }
-    } catch (e) {
-      console.warn('Naukri Apify fetch failed, trying direct search:', e);
-    }
+  if (!opts.apifyToken) {
+    throw new Error('Naukri blocks direct requests (reCAPTCHA). Run it through the local browser worker, or set an Apify token.');
   }
-
-  // 2. Direct Naukri Search API
-  try {
-    const encodedKeyword = encodeURIComponent(query);
-    const encodedLoc = encodeURIComponent(location);
-    const expParam = experience !== undefined ? `&experience=${experience}` : '';
-    const url = `https://www.naukri.com/jobapi/v3/search?noOfResults=${limit}&urlType=search_by_keyword&searchType=adv&keyword=${encodedKeyword}&location=${encodedLoc}${expParam}&pageNo=1`;
-
-    const headers = {
-      appid: '109',
-      systemid: 'naukri',
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-      Accept: 'application/json',
-      'clientid': 'd3skt0p',
-    };
-
-    const res = await safeFetchJson<any>(url, { headers });
-    const parsed = parseNaukriPayload(res);
-    if (parsed.length > 0) return parsed;
-  } catch (err) {
-    console.warn('Naukri direct API fetch error:', err);
-  }
-
-  return [];
+  const res = await fetch('https://api.apify.com/v2/acts/muhammetakkurtt~naukri-job-scraper/run-sync-get-dataset-items', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${opts.apifyToken}` },
+    body: JSON.stringify({ keyword: opts.query, location: opts.location, maxJobs: opts.limit ?? 20 }),
+  });
+  if (!res.ok) throw new Error(`Apify Naukri actor failed: HTTP ${res.status}`);
+  return parseNaukriApify((await res.json()) as unknown[]);
 }

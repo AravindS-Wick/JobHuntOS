@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import type { RawJob } from '@jobhunt/core';
+import type { FormQuestion, RawJob } from '@jobhunt/core';
 import { getJson } from './http.js';
 import { htmlToText } from './html.js';
 
@@ -49,6 +49,51 @@ export function parseGreenhouse(payload: unknown, token: string, companyName?: s
       department: j.departments?.[0]?.name,
     };
   });
+}
+
+// ------------------------------------------------- application questions ----
+
+const GhField = z.object({
+  name: z.string(),
+  type: z.string(),
+  values: z.array(z.object({ label: z.string(), value: z.union([z.string(), z.number()]) })).optional(),
+});
+const GhQuestion = z.object({ label: z.string(), required: z.boolean().nullish(), fields: z.array(GhField) });
+const GhQuestions = z.object({
+  questions: z.array(GhQuestion).default([]),
+  location_questions: z.array(GhQuestion).nullish(),
+});
+
+const GH_TYPES: Record<string, FormQuestion['type']> = {
+  input_text: 'text', textarea: 'textarea', input_file: 'file', input_hidden: 'hidden',
+  multi_value_single_select: 'select', multi_value_multi_select: 'multiselect',
+};
+
+export const greenhouseQuestionsUrl = (token: string, jobId: string) =>
+  `https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(token)}/jobs/${jobId}?questions=true`;
+
+/**
+ * Greenhouse publishes each job's application form. Reading it up front lets
+ * screening answers be resolved and reviewed before approval, not mid-submit.
+ */
+export function parseGreenhouseQuestions(payload: unknown): FormQuestion[] {
+  const d = GhQuestions.parse(payload);
+  return [...d.questions, ...(d.location_questions ?? [])].flatMap((q) => {
+    // A question with a file field and a textarea fallback is one question: prefer the file.
+    const field = q.fields.find((f) => f.type === 'input_file') ?? q.fields[0];
+    if (!field) return [];
+    return [{
+      label: q.label.trim(),
+      name: field.name,
+      type: GH_TYPES[field.type] ?? 'text',
+      options: field.values?.map((v) => v.label),
+      required: Boolean(q.required),
+    }];
+  });
+}
+
+export async function fetchGreenhouseQuestions(token: string, jobId: string): Promise<FormQuestion[]> {
+  return parseGreenhouseQuestions(await getJson(greenhouseQuestionsUrl(token, jobId)));
 }
 
 export async function fetchGreenhouse(token: string, companyName?: string): Promise<RawJob[]> {

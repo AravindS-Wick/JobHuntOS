@@ -1,3 +1,4 @@
+import nodemailer from 'nodemailer';
 import { safeFetchJson } from './http.js';
 import { stripHtml } from './html.js';
 
@@ -40,8 +41,39 @@ export interface GmailDraftOptions {
   to: string;
   subject: string;
   body: string;
+  html?: string;
   inReplyTo?: string;
   threadId?: string;
+}
+
+export interface GmailSmtpSendOptions {
+  user: string;
+  pass: string;
+  fromName?: string;
+  to: string;
+  cc?: string;
+  bcc?: string;
+  subject: string;
+  text: string;
+  html?: string;
+}
+
+export interface GmailApiSendOptions {
+  accessToken: string;
+  to: string;
+  cc?: string;
+  bcc?: string;
+  subject: string;
+  text: string;
+  html?: string;
+  threadId?: string;
+}
+
+export interface GmailSendResult {
+  success: boolean;
+  messageId?: string;
+  threadId?: string;
+  error?: string;
 }
 
 /**
@@ -319,18 +351,42 @@ export async function fetchGmailMessages(opts: GmailFetchOptions): Promise<Parse
  * Create a draft message in Gmail using the Gmail API.
  */
 export async function createGmailDraft(opts: GmailDraftOptions): Promise<{ id: string; threadId: string } | null> {
-  const { accessToken, to, subject, body, threadId } = opts;
+  const { accessToken, to, subject, body, html, threadId } = opts;
   if (!accessToken) return null;
 
-  const emailLines = [
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    'Content-Type: text/plain; charset="UTF-8"',
-    '',
-    body,
-  ];
+  const boundary = `__jobhunt_${Date.now()}__`;
+  let rawMessage = '';
 
-  const raw = Buffer.from(emailLines.join('\r\n')).toString('base64url');
+  if (html) {
+    rawMessage = [
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      'MIME-Version: 1.0',
+      `Content-Type: multipart/alternative; boundary="${boundary}"`,
+      '',
+      `--${boundary}`,
+      'Content-Type: text/plain; charset="UTF-8"',
+      '',
+      body,
+      '',
+      `--${boundary}`,
+      'Content-Type: text/html; charset="UTF-8"',
+      '',
+      html,
+      '',
+      `--${boundary}--`,
+    ].join('\r\n');
+  } else {
+    rawMessage = [
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      'Content-Type: text/plain; charset="UTF-8"',
+      '',
+      body,
+    ].join('\r\n');
+  }
+
+  const raw = Buffer.from(rawMessage).toString('base64url');
 
   try {
     const res = await safeFetchJson<any>('https://gmail.googleapis.com/gmail/v1/users/me/drafts', {
@@ -353,3 +409,134 @@ export async function createGmailDraft(opts: GmailDraftOptions): Promise<{ id: s
     return null;
   }
 }
+
+/**
+ * Send an email using Gmail SMTP with Google App Password.
+ * Standard approach used by PaulleDemon/Email-automation and n8n workflows.
+ */
+export async function sendGmailSmtp(opts: GmailSmtpSendOptions): Promise<GmailSendResult> {
+  const { user, pass, fromName, to, cc, bcc, subject, text, html } = opts;
+
+  if (!user || !pass) {
+    return {
+      success: false,
+      error: 'Gmail SMTP credentials missing. Please provide user (email) and app password.',
+    };
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // SSL
+      auth: {
+        user,
+        pass,
+      },
+    });
+
+    const fromAddress = fromName ? `"${fromName}" <${user}>` : user;
+
+    const info = await transporter.sendMail({
+      from: fromAddress,
+      to,
+      cc,
+      bcc,
+      subject,
+      text,
+      html: html || undefined,
+    });
+
+    return {
+      success: true,
+      messageId: info.messageId,
+    };
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.warn('Gmail SMTP send failed:', errorMsg);
+    return {
+      success: false,
+      error: errorMsg,
+    };
+  }
+}
+
+/**
+ * Send an email directly via Gmail REST API (OAuth access token).
+ */
+export async function sendGmailApi(opts: GmailApiSendOptions): Promise<GmailSendResult> {
+  const { accessToken, to, cc, bcc, subject, text, html, threadId } = opts;
+
+  if (!accessToken) {
+    return {
+      success: false,
+      error: 'Gmail API Access Token required for direct API send.',
+    };
+  }
+
+  const boundary = `__jobhunt_${Date.now()}__`;
+  const headers = [
+    `To: ${to}`,
+    ...(cc ? [`Cc: ${cc}`] : []),
+    ...(bcc ? [`Bcc: ${bcc}`] : []),
+    `Subject: ${subject}`,
+    'MIME-Version: 1.0',
+  ];
+
+  let rawMessage = '';
+  if (html) {
+    rawMessage = [
+      ...headers,
+      `Content-Type: multipart/alternative; boundary="${boundary}"`,
+      '',
+      `--${boundary}`,
+      'Content-Type: text/plain; charset="UTF-8"',
+      '',
+      text,
+      '',
+      `--${boundary}`,
+      'Content-Type: text/html; charset="UTF-8"',
+      '',
+      html,
+      '',
+      `--${boundary}--`,
+    ].join('\r\n');
+  } else {
+    rawMessage = [
+      ...headers,
+      'Content-Type: text/plain; charset="UTF-8"',
+      '',
+      text,
+    ].join('\r\n');
+  }
+
+  const raw = Buffer.from(rawMessage).toString('base64url');
+
+  try {
+    const res = await safeFetchJson<any>('https://gmail.googleapis.com/gmail/v1/users/me/messages/send', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        raw,
+        threadId,
+      }),
+    });
+
+    return {
+      success: true,
+      messageId: res.id,
+      threadId: res.threadId,
+    };
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.warn('Gmail API send failed:', errorMsg);
+    return {
+      success: false,
+      error: errorMsg,
+    };
+  }
+}
+

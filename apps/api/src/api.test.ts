@@ -338,3 +338,136 @@ describe('POST /jobs/ingest-batch', () => {
     expect(job!.postedAt).toBeNull();
   });
 });
+
+describe('facts and screening question resolver API', () => {
+  it('GET /facts lists verified facts', async () => {
+    const res = await app.inject({ method: 'GET', url: '/facts', headers: auth });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.total).toBeGreaterThanOrEqual(25);
+    expect(body.items.some((f: { key: string }) => f.key === 'full_name')).toBe(true);
+  });
+
+  it('POST /facts updates or creates a verified fact', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/facts',
+      headers: auth,
+      payload: {
+        key: 'preferred_editor',
+        category: 'preferences',
+        label: 'Preferred Code Editor',
+        value: 'VS Code & Cursor',
+        verifiedAt: new Date().toISOString(),
+      },
+    });
+    expect(res.statusCode).toBe(200);
+    expect(res.json().key).toBe('preferred_editor');
+
+    const verify = await app.inject({ method: 'GET', url: '/facts?category=preferences', headers: auth });
+    expect(verify.json().items.some((f: { key: string }) => f.key === 'preferred_editor')).toBe(true);
+  });
+
+  it('POST /facts/resolve evaluates screening questions with truth constraint', async () => {
+    // 1. Notice period
+    const noticeRes = await app.inject({
+      method: 'POST',
+      url: '/facts/resolve',
+      headers: auth,
+      payload: { question: 'What is your current notice period in days?' },
+    });
+    expect(noticeRes.statusCode).toBe(200);
+    expect(noticeRes.json().outcome).toBe('answer');
+    expect(noticeRes.json().answer).toBe(60);
+
+    // 2. Truth constraint on gap
+    const gapRes = await app.inject({
+      method: 'POST',
+      url: '/facts/resolve',
+      headers: auth,
+      payload: {
+        question: 'Do you have production experience with AWS?',
+        options: ['Yes', 'No'],
+      },
+    });
+    expect(gapRes.statusCode).toBe(200);
+    expect(gapRes.json().outcome).toBe('answer');
+    expect(gapRes.json().formattedAnswer).toBe('No');
+    expect(gapRes.json().reason).toContain('Truth constraint');
+
+    // 3. Mandatory gap requirement aborts
+    const abortRes = await app.inject({
+      method: 'POST',
+      url: '/facts/resolve',
+      headers: auth,
+      payload: {
+        question: 'This role has a mandatory requirement: Do you have at least 3 years Kubernetes experience?',
+      },
+    });
+    expect(abortRes.statusCode).toBe(200);
+    expect(abortRes.json().outcome).toBe('abort');
+  });
+
+  it('GET /outreach/templates returns available archetypes', async () => {
+    const res = await app.inject({ method: 'GET', url: '/outreach/templates', headers: auth });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(body.templates).toBeDefined();
+    expect(body.templates.direct_hiring_manager).toBeDefined();
+    expect(body.templates.internal_referral).toBeDefined();
+    expect(body.templates.recruiter_pitch).toBeDefined();
+  });
+
+  it('POST /outreach/generate creates customized outreach with tags and web compose url', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/outreach/generate',
+      headers: auth,
+      payload: {
+        recipientName: 'David Miller',
+        recipientEmail: 'david@enterprise.io',
+        company: 'Enterprise AI Corp',
+        role: 'Staff Full-Stack Engineer',
+        archetype: 'internal_referral',
+        customNote: 'Loved your keynote on async agent workflows.',
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const data = res.json();
+    expect(data.subject).toContain('Enterprise AI Corp');
+    expect(data.bodyText).toContain('Hi David,');
+    expect(data.bodyText).toContain('Enterprise AI Corp');
+    expect(data.bodyText).toContain('internal referral');
+    expect(data.webComposeUrl).toContain('mail.google.com');
+    expect(data.wordCount).toBeGreaterThan(20);
+    expect(data.tags.candidate_name).toBeDefined();
+    expect(data.tags.company).toBe('Enterprise AI Corp');
+  });
+
+  it('POST /outreach/send records audit event and handles missing credentials safely', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/outreach/send',
+      headers: auth,
+      payload: {
+        to: 'recruiter@techventures.co',
+        subject: 'Application: Senior Engineer',
+        bodyText: 'Hello recruiter, please find my resume attached.',
+        mode: 'smtp',
+      },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const data = res.json();
+    expect(data.success).toBe(false);
+    expect(data.error).toContain('credentials missing');
+
+    // Audit event must be recorded
+    const eventRes = await app.inject({ method: 'GET', url: '/events?entityType=outreach', headers: auth });
+    expect(eventRes.statusCode).toBe(200);
+    const events = eventRes.json();
+    expect(events.length).toBeGreaterThanOrEqual(1);
+    expect(events[0].entityId).toBe('recruiter@techventures.co');
+  });
+});

@@ -1,0 +1,168 @@
+{
+ "id": "744000153203866",
+ "name": "Project Management Intern",
+ "uuid": "6b962252-1664-400c-98a0-dc24f889c780",
+ "jobId": "527f462c-c456-45ac-a408-4b4c1d38d557",
+ "jobAdId": "f0cc9035-4d52-4f09-bd3c-e7da249d60fa",
+ "defaultJobAd": true,
+ "refNumber": "REF297213U",
+ "company": {
+  "name": "Bosch Group",
+  "identifier": "BoschGroup"
+ },
+ "location": {
+  "city": "Plymouth",
+  "region": "MI",
+  "country": "us",
+  "address": "15000 North Haggerty Road",
+  "postalCode": "48170",
+  "remote": false,
+  "hybrid": true,
+  "latitude": "42.3917364",
+  "longitude": "-83.43853899999999",
+  "fullLocation": "Plymouth, MI, United States"
+ },
+ "customField": [
+  {
+   "fieldId": "5abe2a4ab60a5e486a2d9b1d",
+   "fieldLabel": "Contract type",
+   "valueId": "1e46492b-d24f-460c-b095-38cf08a778d8",
+   "valueLabel": "Unlimited"
+  },
+  {
+   "fieldId": "5abe28e96d8bc56863dd9746",
+   "fieldLabel": "Tariff Area",
+   "valueId": "82f1dd4b-de9d-4134-9f1a-8d315be380ae",
+   "valueLabel": "United States Local Grades"
+  },
+  {
+   "fieldId": "586a997ee4b05fd937b86098",
+   "fieldLabel": "Legal Entity(acronym)",
+   "valueId": "RBUS",
+   "valueLabel": "RBUS"
+  },
+  {
+   "fieldId": "586a99b5e4b0daa006ae1079",
+   "fieldLabel": "Working Location",
+   "valueId": "Plymouth, MI",
+   "valueLabel": "Plymouth, MI"
+  },
+  {
+   "fieldId": "5abe295a6d8bc56863dd9747",
+   "fieldLabel": "Global Salary Level",
+   "valueId": "4319a4d2-6690-4a34-ac0f-9d8c126f1af2",
+   "valueLabel": "Junior/ Lower Tariff"
+  },
+  {
+   "fieldId": "69ca83a2489188782a1e9f87",
+   "fieldLabel": "Direct Or Indirect",
+   "valueId": "1aefbf4c-c10a-422e-a975-a504a7117792",
+   "valueLabel": "Indirect"
+  },
+  {
+   "fieldId": "5abe29f9b60a5e486a2d9b1c",
+   "fieldLabel": "Working hours",
+   "valueId": "ff7c69f3-f89c-498c-9a0e-25f4dad301d4",
+   "valueLabel": "Full-time and/or part-time"
+  },
+  {
+   "fieldId": "586a9995e4b0daa006ae1078",
+   "fieldLabel": "Legal Entity",
+   "valueId": "Robert Bosch LLC",
+   "valueLabel": "Robert Bosch LLC"
+  },
+  {
+   "fieldId": "691cf1c93001c782b9560ab7",
+   "fieldLabel": "Division full name",
+   "valueId": "1b180572-38a0-463d-8f17-a860bf7efdc8",
+   "valueLabel": "CP"
+  },
+  {
+   "fieldId": "5abe27936d8bc56863dd9745",
+   "fieldLabel": "Position type",
+   "valueId": "f524b939-fe55-407b-a0b0-e8f4eec28997",
+   "valueLabel": "Intern"
+  },
+  {
+   "fieldId": "COUNTRY",
+   "fieldLabel": "Country/Region",
+   "valueId": "us",
+   "valueLabel": "United States"
+  },
+  {
+   "fieldId": "586a971ee4b0daa006ae1077",
+   "fieldLabel": "Brands",
+   "valueId": "default",
+   "valueLabel": "Bosch Group"
+  },
+  {
+   "fieldId": "586a996ce4b05fd937b86097",
+   "fieldLabel": "Working Country",
+   "valueId": "US",
+   "valueLabel": "United States"
+  },
+  {
+   "fieldId": "586a9b22e4b05fd937b8609a",
+   "fieldLabel": "Local Grade",
+   "valueId": "US_HOURLYRR",
+   "valueLabel": "US_HOURLYRR"
+  },
+  {
+   "fieldId": "586a99a5e4b05fd937b86099",
+   "fieldLabel": "Division",
+   "valueId": "CP",
+   "valueLabel": "CP"
+  }
+ ],
+ "releasedDate": "2026-10-02T14:47:26.357Z",
+ "creator": {
+  "name": "",
+  "avatarUrl": ""
+ },
+ "postingUrl": "https://jobs.smartrecruiters.com/BoschGroup/744000153203866-project-management-intern",
+ "applyUrl": "https://jobs.smartrecruiters.com/BoschGroup/744000153203866-project-management-intern?oga=true",
+ "referralUrl": "https://jobs.smartrecruiters.com/external-referrals/company/BoschGroup/publication/6b962252-1664-400c-98a0-dc24f889c780?dcr_ci=BoschGroup",
+ "jobAd": {
+  "sections": {
+   "companyDescription": {
+    "title": "Company Description",
+    "text": "<p><strong>We Are Bosch.</strong></p><p>At Bosch, we shape the future by inventing high-quality technologies and services that spark enthusiasm and enrich people’s lives. Our areas of activity are every bit as diverse as our outstanding Bosch teams around the world. Their creativity is the key to innovation through connected living, mobility, or industry.</p><p>Let’s grow together, enjoy more, and inspire each other.&#xa0;<u>Work&#xa0;<strong>#LikeABosch</strong></u></p><ul><li><strong>Reinvent yourself:</strong>&#xa0;At Bosch, you will evolve.</li><li><strong>Discover new directions:&#xa0;</strong>At Bosch, you will find your place.</li><li><strong>Balance your life:&#xa0;</strong>At Bosch, your job matches your lifestyle.</li><li><strong>Celebrate success:&#xa0;</strong>At Bosch, we celebrate you.</li><li><strong>Be yourself:&#xa0;</strong>At Bosch, we value values.</li><li><strong>Shape tomorrow:</strong>&#xa0;At Bosch, you change lives.</li></ul>"
+   },
+   "jobDescription": {
+    "title": "Job Description",
+    "text": "<p>The Project Management Intern is primarily responsible for supporting the Project Manager in providing project coordination and leadership to successfully complete high level projects to meet customers’ expectations of performance and schedule, as well as, internal objectives of profitability.</p><ul><li>Work with sales, applications, estimating, and manufacturing on high level projects to define the customer’s project requirements and deliver an order acknowledgement that meets the customer’s needs.</li><li>Support in developing and maintaining clear understanding of project objectives, critical paths, schedule &amp; cost requirements. Support discussions including; design changes, project review, questions &amp; concerns.</li><li>Participate in project meetings; assign responsibilities to team members as needed. Motivate and challenge team members to ensure deadlines are met. Maintain an OPL and take minutes for weekly meetings.</li><li>Assist to maintain complete record of the project history including any changes in design concept, project scope and the related cost impact. Responsible for maintaining project folders with up to date documents and status reports.</li><li>Assist with developing Project management processes and tools (team structure, schedule formats, progress reports, financial reports, presentations, forecasting &amp; tracking tools).</li><li>Offsite meetings required (Warren, MI and other locations). Some travel may be possible.</li></ul>"
+   },
+   "qualifications": {
+    "title": "Qualifications",
+    "text": "<p><strong>Minimum Qualifications:&#xa0;</strong></p><ul><li>Must be enrolled in an engineering or business study program pursuing a Bachelors or Masters degree with at least one semester completed</li><li>Effective oral and written communication skills.</li><li>Basic PC skills to track project status; strong Microsoft Excel experience (PPT, Word, and MS Project also)</li><li>Ability to integrate in an international project team.</li><li>A minimum 3.0 GPA</li><li>Must be at least 18 years of age</li><li>Minimum 25 hours a week</li></ul>"
+   },
+   "additionalInformation": {
+    "title": "Additional Information",
+    "text": "<p>By choice, we are committed to a diverse workforce - EOE/Protected Veteran/Disabled.<br>\n<br>\nBOSCH is a proud supporter of STEM (Science, Technology, Engineering &amp; Mathematics) Initiatives<br>\n<br>\n&#xa0;&#xa0;&#xa0; FIRST Robotics (For Inspiration and Recognition of Science and Technology)<br>\n&#xa0;&#xa0;&#xa0; AWIM (A World In Motion)<br>\n<br>\n<strong>&#xa0;Indefinite U.S. work authorized individuals only.&#xa0; Future sponsorship for work authorization unavailable.</strong><br>\n&#xa0;</p>"
+   }
+  }
+ },
+ "active": true,
+ "visibility": "PUBLIC",
+ "industry": {
+  "id": "mechanical_engineering",
+  "label": "Mechanical Or Industrial Engineering"
+ },
+ "function": {
+  "id": "engineering",
+  "label": "Engineering"
+ },
+ "experienceLevel": {
+  "id": "associate",
+  "label": "Associate"
+ },
+ "typeOfEmployment": {
+  "id": "permanent",
+  "label": "Full-time"
+ },
+ "language": {
+  "code": "en",
+  "label": "English",
+  "labelNative": "English (US)"
+ }
+}

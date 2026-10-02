@@ -9,7 +9,8 @@ export type NavTabId =
   | 'unified-inbox'
   | 'extension'
   | 'profile'
-  | 'audit';
+  | 'audit'
+  | 'apply';
 
 export type PlatformId =
   | 'linkedin'

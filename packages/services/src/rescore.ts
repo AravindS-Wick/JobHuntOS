@@ -50,13 +50,15 @@ export function rescoreService(repos: Repos) {
       const started = Date.now();
       const profile = await profiles.resolve();
       const rows = await repos.jobs.allForRescore();
+      const signalByCompany = new Map((await repos.companies.list({})).map((c) => [c.id, c.signal ?? 0]));
       const now = new Date();
 
       const updates = [];
       const tiers: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0 };
 
       for (const row of rows) {
-        const s = scoreJob(toNormalized(row), profile, now);
+        const signal = row.companyId ? signalByCompany.get(row.companyId) : undefined;
+        const s = scoreJob(toNormalized(row), profile, now, signal);
         tiers[s.tier] = (tiers[s.tier] ?? 0) + 1;
         const unchanged =
           row.score === s.score &&
