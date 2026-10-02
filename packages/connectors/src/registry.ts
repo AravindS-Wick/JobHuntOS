@@ -5,7 +5,7 @@ import type { CompanyEntry } from '@jobhunt/core';
 
 const Entry = z.object({
   name: z.string(),
-  ats: z.enum(['greenhouse', 'lever', 'ashby', 'workday', 'smartrecruiters', 'unknown']),
+  ats: z.enum(['greenhouse', 'lever', 'ashby', 'workday', 'smartrecruiters', 'zohorecruit', 'unknown']),
   token: z.string(),
   careersUrl: z.string().optional(),
   signal: z.number().min(-5).max(5).optional(),

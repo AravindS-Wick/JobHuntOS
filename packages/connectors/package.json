@@ -1,5 +1,16 @@
 {
-  "name": "@jobhunt/connectors", "version": "0.1.0", "private": true, "type": "module",
+  "name": "@jobhunt/connectors",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
   "main": "src/index.ts",
-  "dependencies": { "@jobhunt/core": "workspace:*", "yaml": "^2.6.1", "zod": "^4.4.3" }
+  "dependencies": {
+    "@jobhunt/core": "workspace:*",
+    "nodemailer": "^10.0.13",
+    "yaml": "^2.6.1",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^8.0.2"
+  }
 }

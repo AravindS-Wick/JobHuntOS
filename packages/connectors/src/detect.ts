@@ -56,18 +56,26 @@ export function detectAts(rawUrl: string): AtsDetection {
   // {tenant}.wd{n}.myworkdayjobs.com/{locale?}/{site}
   const wd = host.match(/^([a-z0-9-]+)\.(wd\d+)\.myworkdayjobs\.com$/);
   if (wd) {
-    const site = segs.find((s) => !/^[a-z]{2}(-[A-Z]{2})?$/.test(s)) ?? segs[segs.length - 1] ?? '';
+    // Path is /{locale?}/{site}/job/...; the site is the first non-locale segment.
+    const site = segs.find((s) => !/^[a-z]{2}-[A-Z]{2}$/.test(s) && s !== 'details' && s !== 'job') ?? '';
     return {
       ats: 'workday',
-      token: wd[1] ?? null,
+      token: site ? `${wd[1]}/${wd[2]}/${site}` : null,
       meta: { tenant: wd[1] ?? '', dc: wd[2] ?? '', site, host },
-      note: 'Workday needs a per-tenant CXS POST endpoint; semi-automatic only.',
+      note: site ? undefined : 'Workday URL is missing the site segment (…/en-US/{site}).',
     };
   }
 
   // --- SmartRecruiters ---
+  // careers.smartrecruiters.com/{company} | jobs.smartrecruiters.com/{company}/{id}
   if (host.endsWith('smartrecruiters.com')) {
     return { ats: 'smartrecruiters', token: segs[0] ?? null };
+  }
+
+  // --- Zoho Recruit ---
+  // {co}.zohorecruit.com|in/jobs/Careers, careers.zohocorp.com/jobs/Careers
+  if (/\.zohorecruit\.(com|in|eu)$/.test(host) || host === 'careers.zohocorp.com') {
+    return { ats: 'zohorecruit', token: `${host}/jobs/Careers` };
   }
 
   return {
