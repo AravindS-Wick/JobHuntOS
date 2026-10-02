@@ -19,9 +19,10 @@ import { UnifiedInboxView } from './views/UnifiedInboxView';
 import { ExtensionRunnerView } from './views/ExtensionRunnerView';
 import { ProfileFactTableView } from './views/ProfileFactTableView';
 import { AuditLogView } from './views/AuditLogView';
+import { ApplyPipelineView } from './views/ApplyPipelineView';
 
 export const App: React.FC = () => {
-  const [currentTab, setCurrentTab] = useState<NavTabId>('dashboard');
+  const [currentTab, setCurrentTab] = useState<NavTabId>('apply');
   const [jobs, setJobs] = useState<Job[]>(appStore.jobs);
   const [companies, setCompanies] = useState<Company[]>(appStore.companies);
   const [stats, setStats] = useState(appStore.stats);
@@ -215,6 +216,7 @@ export const App: React.FC = () => {
             {currentTab === 'profile' && <ProfileFactTableView />}
 
             {currentTab === 'audit' && <AuditLogView events={events} />}
+            {currentTab === 'apply' && <ApplyPipelineView />}
           </main>
         </div>
 

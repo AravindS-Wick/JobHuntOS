@@ -27,6 +27,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     badgeColor?: string;
   }[] = [
     {
+      id: 'apply',
+      label: 'Apply Pipeline',
+      icon: 'fa-solid fa-rocket',
+      color: 'text-accent-emerald',
+    },
+    {
       id: 'dashboard',
       label: 'Analytics & Control',
       icon: 'fa-solid fa-chart-pie',
