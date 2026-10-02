@@ -37,8 +37,8 @@ relax them to "get more throughput".
 
 Turborepo · pnpm · Node 22 · TypeScript (strict, `noUncheckedIndexedAccess`)
 · Zod at every boundary · Vitest · Postgres 16 + pgvector + Drizzle · Redis
-Planned: Fastify + tRPC, BullMQ, Playwright (headed, persistent context),
-Next.js 15 console, MV3 extension, python-docx sidecar.
+Built: Fastify + Zod API, Vite/React console (`apps/web`), MV3 extension (`apps/extension`).
+Planned: tRPC, BullMQ, Playwright (headed, persistent context), Next.js 15 console, python-docx sidecar.
 
 ## Layout
 
@@ -51,6 +51,8 @@ packages/contracts    Zod schemas = the API contract; each export is schema AND 
 packages/api-client   typed fetch client the console imports
 apps/api              Fastify + Zod + OpenAPI  (routes are thin; logic lives in services)
 apps/cli              ingest · score · digest · detect · verify · demo · registry:sync
+apps/web              Vite + React decision cockpit (falls back to built-in demo data when the API is down)
+apps/extension        MV3 extension: scrape job cards, assisted Easy Apply autofill (never submits)
 config/companies.yaml the Target Company Registry (the most valuable file here)
 fixtures/             real-shaped API payloads for offline tests
 ```
@@ -98,7 +100,7 @@ pnpm cli detect "<careers url>"    # find the ATS + board token
 pnpm cli verify                    # check every registry entry resolves
 pnpm ingest                        # poll enabled boards → out/jobs.json
 pnpm digest                        # re-print the last run
-pnpm test                          # 110 tests
+pnpm test                          # all packages (PGlite, no external services)
 
 docker compose up -d               # Postgres 16 + pgvector, Redis
 pnpm db:migrate                    # apply migrations

@@ -157,7 +157,7 @@ Tiers: **1** ≥70 · **2** 50–69 · **3** 30–49 · **4** Disqualified.
 | `pnpm cli verify` | Test and verify all registered company careers boards |
 | `pnpm ingest` | Poll enabled company boards, score jobs, write `out/jobs.json` |
 | `pnpm digest` | Print ranked daily digest of ingested jobs |
-| `pnpm test` | Run 121 unit & integration tests with Vitest & PGlite |
+| `pnpm test` | Run all unit & integration tests with Vitest & PGlite |
 | `pnpm typecheck` | Run strict TypeScript compiler verification across monorepo |
 | `pnpm build` | Build monorepo packages and production web distribution |
 | `pnpm api` | Start Fastify API server on port 4000 |
