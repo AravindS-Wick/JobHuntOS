@@ -1,4 +1,4 @@
-import { createRepos, closeDb, getDb, createTestDb, pingDb } from '@jobhunt/db';
+import { createRepos, closeDb, dbReady, getDb, createTestDb, pingDb } from '@jobhunt/db';
 import { syncRegistry } from '@jobhunt/services';
 import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
@@ -10,9 +10,14 @@ async function main() {
 
   try {
     const db = getDb(config.DATABASE_URL);
+    await dbReady();
     const reachable = await pingDb(db);
     if (!reachable) throw new Error('Database unreachable');
     repos = createRepos(db);
+    // A fresh database starts with your registry, so the first ingest has boards to poll.
+    if ((await repos.companies.count()) === 0) {
+      await syncRegistry(repos, config.REGISTRY_PATH).catch((e) => console.warn('Could not sync registry:', e instanceof Error ? e.message : e));
+    }
   } catch (err) {
     // An in-memory fallback in production would silently lose data on restart.
     if (config.NODE_ENV === 'production') throw err;

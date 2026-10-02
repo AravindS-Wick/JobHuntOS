@@ -22,6 +22,9 @@ import { statsRoutes } from './routes/stats.js';
 import { eventRoutes } from './routes/events.js';
 import { inboxRoutes } from './routes/inbox.js';
 import { connectorRoutes } from './routes/connectors.js';
+import { applyRoutes } from './routes/apply.js';
+import { factRoutes } from './routes/facts.js';
+import { outreachRoutes } from './routes/outreach.js';
 
 export interface BuildOptions {
   config: Config;
@@ -86,6 +89,11 @@ export async function buildApp({ config, repos }: BuildOptions): Promise<Fastify
         { name: 'events', description: 'Audit log' },
         { name: 'inbox', description: 'Gmail and communication intelligence' },
         { name: 'connectors', description: 'Live search and platform integrations' },
+        { name: 'facts', description: 'Verified fact table and screening question resolver' },
+        { name: 'resumes', description: 'Master resume: the only source tailoring may draw from' },
+        { name: 'applications', description: 'Prepare → batch approve → submitted by the local browser worker' },
+        { name: 'agent', description: 'Protocol for the local browser worker, and the Human Gate' },
+        { name: 'boards', description: 'Job boards and big-company careers sites' },
       ],
       components: {
         securitySchemes: {
@@ -114,6 +122,9 @@ export async function buildApp({ config, repos }: BuildOptions): Promise<Fastify
   await app.register(eventRoutes);
   await app.register(inboxRoutes);
   await app.register(connectorRoutes);
+  await app.register(factRoutes);
+  await app.register(outreachRoutes);
+  await app.register(applyRoutes);
 
   return app;
 }

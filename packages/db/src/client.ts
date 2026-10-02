@@ -21,6 +21,12 @@ export type Db = PgDatabase<PgQueryResultHKT, typeof schema>;
 let _db: Db | null = null;
 let _sql: ReturnType<typeof postgres> | null = null;
 let _pglite: PGlite | null = null;
+let _ready: Promise<void> = Promise.resolve();
+
+/** Resolves once an embedded database has its migrations applied. Await before serving. */
+export function dbReady(): Promise<void> {
+  return _ready;
+}
 
 async function applyMigrationsToPglite(client: PGlite) {
   if (!existsSync(MIGRATIONS_DIR)) return;
@@ -56,16 +62,15 @@ export function getDb(url = process.env.DATABASE_URL): Db {
   }
 
   // Zero-dependency embedded PGlite fallback
-  const dataDir = resolve(process.cwd(), '.data/pglite');
+  // `DATABASE_URL=pglite` (or unset): persistent embedded Postgres, no Docker needed.
+  const dataDir = resolve(process.env.JOBHUNT_DATA_DIR ?? '.data', 'pglite');
   if (!existsSync(dataDir)) {
     mkdirSync(dataDir, { recursive: true });
   }
 
   _pglite = new PGlite(dataDir);
   _db = drizzlePglite(_pglite, { schema }) as unknown as Db;
-  applyMigrationsToPglite(_pglite).catch((err) => {
-    console.warn('PGlite migration warning:', err);
-  });
+  _ready = applyMigrationsToPglite(_pglite);
 
   return _db;
 }

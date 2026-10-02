@@ -151,3 +151,27 @@ export const inboxMessages = pgTable(
   }),
 );
 
+/** Verified Fact Table (PRD §8, G4/D3) — Truth constraint for auto-screening & tailoring */
+export const facts = pgTable(
+  'facts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    key: text('key').notNull(),
+    category: text('category').notNull(),
+    label: text('label').notNull(),
+    value: jsonb('value').notNull(),
+    evidence: text('evidence'),
+    verifiedAt: timestamp('verified_at', { withTimezone: true }).notNull().defaultNow(),
+    notes: text('notes'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniqKey: uniqueIndex('facts_key_idx').on(t.key),
+    byCategory: index('facts_category_idx').on(t.category),
+  }),
+);
+
+
+// Apply engine tables live in their own file; re-exported so drizzle-kit and the client see one schema.
+export * from './schema-apply.js';

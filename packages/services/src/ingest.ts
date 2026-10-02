@@ -4,7 +4,7 @@ import {
   mapWithConcurrency,
   fetchLinkedInJobs,
   fetchNaukriJobs,
-  fetchIndeedJobs,
+  browserSearchUrl,
   type FetchResult,
   type LinkedInSearchOptions,
   type NaukriSearchOptions,
@@ -99,7 +99,10 @@ export function ingestService(repos: Repos) {
 
         const { unique, duplicatesRemoved } = dedupe(normalized);
         const profile = await profiles.resolve();
-        const scored: ScoredJob[] = unique.map((j) => scoreJob(j, profile, now));
+        const signalByToken = new Map(targets.map((c) => [`${c.ats}:${c.token}`, c.signal ?? 0]));
+        const scored: ScoredJob[] = unique.map((j) =>
+          scoreJob(j, profile, now, signalByToken.get(`${j.source}:${j.companySlug}`)),
+        );
 
         const companyIdByToken = new Map(targets.map((c) => [`${c.ats}:${c.token}`, c.id]));
         const persist = dryRun ? { inserted: 0, updated: 0 } : await repos.jobs.upsertMany(scored, companyIdByToken);
@@ -180,10 +183,14 @@ export function ingestService(repos: Repos) {
 
       if (source === 'linkedin') {
         rawJobs = await fetchLinkedInJobs(options as LinkedInSearchOptions);
-      } else if (source === 'naukri') {
+      } else if (source === 'naukri' && (options as NaukriSearchOptions).apifyToken) {
         rawJobs = await fetchNaukriJobs(options as NaukriSearchOptions);
-      } else if (source === 'indeed') {
-        rawJobs = await fetchIndeedJobs(options as IndeedSearchOptions);
+      } else {
+        // Naukri and Indeed block direct requests: hand the search to the local browser worker.
+        const q = { keywords: options.query, location: options.location, limit: options.limit };
+        await repos.agentTasks.enqueue({ kind: 'scrape', platform: source, payload: { board: source, url: browserSearchUrl(source, q), query: q } });
+        await repos.events.record({ entityType: 'run', action: 'browser_search_queued', actor: 'system', payload: { board: source, query: q } });
+        return { source, fetched: 0, inserted: 0, updated: 0, tiers: {}, jobs: [], queuedForBrowser: true };
       }
 
       const batchResult = await this.ingestBatch(rawJobs, 'agent');

@@ -15,6 +15,20 @@
       "when": 1787641541273,
       "tag": "0001_inbox_messages",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790947803979,
+      "tag": "0002_smart_odin",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790955056747,
+      "tag": "0003_secret_exiles",
+      "breakpoints": true
     }
   ]
 }

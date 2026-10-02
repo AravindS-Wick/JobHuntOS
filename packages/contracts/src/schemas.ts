@@ -10,7 +10,7 @@ export const ErrorResponse = z.object({
   }),
 });
 
-export const AtsType = z.enum(['greenhouse', 'lever', 'ashby', 'workday', 'smartrecruiters', 'unknown']);
+export const AtsType = z.enum(['greenhouse', 'lever', 'ashby', 'workday', 'smartrecruiters', 'zohorecruit', 'unknown']);
 export const WorkMode = z.enum(['remote', 'hybrid', 'onsite', 'unknown']);
 export const JobStatus = z.enum(['to_apply', 'queued', 'applied', 'skipped', 'expired']);
 
@@ -379,6 +379,8 @@ export const SourceSearchResponse = z.object({
   updated: z.number(),
   tiers: z.record(z.string(), z.number()),
   jobs: z.array(z.any()),
+  /** Naukri/Indeed: the search was queued for the local browser worker instead of run here. */
+  queuedForBrowser: z.boolean().optional(),
 });
 
 export const PlatformTestRequest = z.object({
@@ -392,6 +394,110 @@ export const PlatformTestResponse = z.object({
   message: z.string(),
   latencyMs: z.number(),
   details: z.record(z.string(), z.unknown()).optional(),
+});
+
+// -------------------------------------------------------- verified facts ----
+export const FactCategory = z.enum([
+  'personal',
+  'contact',
+  'authorization',
+  'availability',
+  'compensation',
+  'experience',
+  'education',
+  'links',
+  'preferences',
+]);
+
+export const Fact = z.object({
+  key: z.string(),
+  category: FactCategory,
+  label: z.string(),
+  value: z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]),
+  evidence: z.string().optional(),
+  verifiedAt: z.string(),
+  notes: z.string().optional(),
+});
+
+export const FactListQuery = z.object({
+  category: FactCategory.optional(),
+});
+
+export const FactListResponse = z.object({
+  items: z.array(Fact),
+  total: z.number(),
+});
+
+export const ResolveQuestionRequest = z.object({
+  question: z.string().min(1),
+  options: z.array(z.string()).optional(),
+});
+
+export const ResolveQuestionResponse = z.object({
+  outcome: z.enum(['answer', 'ask', 'abort']),
+  key: z.string().optional(),
+  answer: z.union([z.string(), z.number(), z.boolean(), z.array(z.string())]).optional(),
+  formattedAnswer: z.string(),
+  confidence: z.number(),
+  reason: z.string(),
+});
+
+// ------------------------------------------------------------- outreach ----
+export const OutreachArchetype = z.enum([
+  'direct_hiring_manager',
+  'internal_referral',
+  'recruiter_pitch',
+  'follow_up_1',
+  'follow_up_2',
+]);
+
+export const GenerateOutreachRequest = z.object({
+  recipientName: z.string().min(1),
+  recipientEmail: z.string().email().optional(),
+  company: z.string().min(1),
+  role: z.string().min(1),
+  archetype: OutreachArchetype.optional(),
+  customNote: z.string().optional(),
+  matchedSkills: z.array(z.string()).optional(),
+  customSubjectTemplate: z.string().optional(),
+  customBodyTemplate: z.string().optional(),
+});
+
+export const GenerateOutreachResponse = z.object({
+  subject: z.string(),
+  bodyText: z.string(),
+  bodyHtml: z.string(),
+  webComposeUrl: z.string(),
+  wordCount: z.number(),
+  charCount: z.number(),
+  archetype: OutreachArchetype,
+  candidateName: z.string(),
+  recipientName: z.string(),
+  company: z.string(),
+  role: z.string(),
+  tags: z.record(z.string(), z.string()),
+});
+
+export const SendOutreachEmailRequest = z.object({
+  to: z.string().email(),
+  subject: z.string().min(1),
+  bodyText: z.string().min(1),
+  bodyHtml: z.string().optional(),
+  mode: z.enum(['smtp', 'api', 'draft']).default('smtp'),
+  smtpUser: z.string().optional(),
+  smtpPass: z.string().optional(),
+  fromName: z.string().optional(),
+  apiToken: z.string().optional(),
+  threadId: z.string().optional(),
+});
+
+export const SendOutreachEmailResponse = z.object({
+  success: z.boolean(),
+  mode: z.string(),
+  messageId: z.string().optional(),
+  threadId: z.string().optional(),
+  error: z.string().optional(),
+  webComposeUrl: z.string().optional(),
 });
 
 // ---------------------------------------------------------------------------
@@ -444,4 +550,17 @@ export type IndeedSearchRequest = z.infer<typeof IndeedSearchRequest>;
 export type SourceSearchResponse = z.infer<typeof SourceSearchResponse>;
 export type PlatformTestRequest = z.infer<typeof PlatformTestRequest>;
 export type PlatformTestResponse = z.infer<typeof PlatformTestResponse>;
+
+export type FactCategory = z.infer<typeof FactCategory>;
+export type Fact = z.infer<typeof Fact>;
+export type FactListQuery = z.input<typeof FactListQuery>;
+export type FactListResponse = z.infer<typeof FactListResponse>;
+export type ResolveQuestionRequest = z.infer<typeof ResolveQuestionRequest>;
+export type ResolveQuestionResponse = z.infer<typeof ResolveQuestionResponse>;
+
+export type OutreachArchetype = z.infer<typeof OutreachArchetype>;
+export type GenerateOutreachRequest = z.infer<typeof GenerateOutreachRequest>;
+export type GenerateOutreachResponse = z.infer<typeof GenerateOutreachResponse>;
+export type SendOutreachEmailRequest = z.infer<typeof SendOutreachEmailRequest>;
+export type SendOutreachEmailResponse = z.infer<typeof SendOutreachEmailResponse>;
 

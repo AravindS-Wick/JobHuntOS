@@ -146,6 +146,38 @@ describe('inbox repo', () => {
   });
 });
 
+describe('facts repo', () => {
+  it('seeds default facts idempotently', async () => {
+    const { DEFAULT_FACTS } = await import('@jobhunt/core');
+    const count = await repos.facts.seedDefaults(DEFAULT_FACTS);
+    expect(count).toBe(DEFAULT_FACTS.length);
+
+    const all = await repos.facts.list();
+    expect(all.length).toBeGreaterThanOrEqual(DEFAULT_FACTS.length);
+
+    const fullName = await repos.facts.getByKey('full_name');
+    expect(fullName?.value).toBe('Aravindhan Sivaraman');
+  });
+
+  it('upserts a new fact and retrieves it by key and category', async () => {
+    await repos.facts.upsert({
+      key: 'custom_clearance',
+      category: 'authorization',
+      label: 'Security Clearance',
+      value: 'Standard Background Check Passed',
+      evidence: 'Verification letter',
+      verifiedAt: new Date().toISOString(),
+    });
+
+    const fact = await repos.facts.getByKey('custom_clearance');
+    expect(fact).toBeDefined();
+    expect(fact?.value).toBe('Standard Background Check Passed');
+
+    const authFacts = await repos.facts.list('authorization');
+    expect(authFacts.some((f) => f.key === 'custom_clearance')).toBe(true);
+  });
+});
+
 
 describe('migrations', () => {
   it('every .sql migration is listed in the drizzle journal (db:migrate would skip it otherwise)', async () => {

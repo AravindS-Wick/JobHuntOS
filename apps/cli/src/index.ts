@@ -289,6 +289,135 @@ program
     }
   });
 
+// ----------------------------------------------------------------- facts ----
+program
+  .command('facts')
+  .description('Print the verified candidate fact table (truth constraint)')
+  .option('-c, --category <cat>', 'filter by category')
+  .action(async (opts: { category?: string }) => {
+    const { DEFAULT_FACTS } = await import('@jobhunt/core');
+    const filtered = opts.category
+      ? DEFAULT_FACTS.filter((f) => f.category === opts.category)
+      : DEFAULT_FACTS;
+
+    console.log(pc.bold(`\n  Verified Fact Table — ${filtered.length} entries\n`));
+    for (const f of filtered) {
+      const val = typeof f.value === 'boolean' ? (f.value ? pc.green('Yes') : pc.red('No')) : pc.cyan(String(f.value));
+      console.log(`  ${pc.bold(f.key.padEnd(30))} ${val}`);
+      console.log(`  ${pc.dim(f.label)} · ${pc.dim(f.evidence ?? '')}`);
+      console.log('');
+    }
+  });
+
+program
+  .command('resolve <question>')
+  .description('Simulate screening question resolution against verified facts (PRD §5.4 D3)')
+  .option('-o, --options <opts...>', 'optional radio/select choices')
+  .action(async (question: string, opts: { options?: string[] }) => {
+    const { resolveScreeningQuestion } = await import('@jobhunt/core');
+    console.log(pc.bold(`\nQuestion: `) + question);
+    if (opts.options && opts.options.length) {
+      console.log(pc.dim(`Options:  `) + opts.options.join(' | '));
+    }
+
+    const res = resolveScreeningQuestion(question, { options: opts.options });
+    console.log('');
+    if (res.outcome === 'answer') {
+      console.log(`  ${pc.green('✓ OUTCOME:')}   ${pc.bold(res.outcome.toUpperCase())}`);
+      console.log(`  ${pc.cyan('ANSWER:')}    ${pc.bold(res.formattedAnswer)}`);
+      console.log(`  ${pc.dim('CONFIDENCE:')} ${(res.confidence * 100).toFixed(0)}%`);
+      console.log(`  ${pc.dim('REASON:')}     ${res.reason}`);
+    } else if (res.outcome === 'abort') {
+      console.log(`  ${pc.red('✗ OUTCOME:')}   ${pc.bold(res.outcome.toUpperCase())} (Disqualifying gap / misrepresentation risk)`);
+      console.log(`  ${pc.red('REASON:')}     ${res.reason}`);
+    } else {
+      console.log(`  ${pc.yellow('? OUTCOME:')}   ${pc.bold(res.outcome.toUpperCase())} (Human Gate required)`);
+      console.log(`  ${pc.yellow('REASON:')}     ${res.reason}`);
+    }
+    console.log('');
+  });
+
+// -------------------------------------------------------------- outreach ----
+program
+  .command('outreach:generate')
+  .description('Generate customized cold email or referral request with 1-click Gmail Compose link')
+  .requiredOption('-c, --company <company>', 'target company name')
+  .requiredOption('-r, --role <role>', 'target job role')
+  .requiredOption('-n, --name <recipientName>', 'recipient person name')
+  .option('-e, --email <email>', 'recipient email address')
+  .option('-a, --archetype <archetype>', 'direct_hiring_manager | internal_referral | recruiter_pitch | follow_up_1 | follow_up_2', 'direct_hiring_manager')
+  .option('--note <customNote>', 'custom personalized line to inject')
+  .action(async (opts: {
+    company: string;
+    role: string;
+    name: string;
+    email?: string;
+    archetype: string;
+    note?: string;
+  }) => {
+    const { generateOutreach } = await import('@jobhunt/core');
+    const result = generateOutreach({
+      company: opts.company,
+      role: opts.role,
+      recipientName: opts.name,
+      recipientEmail: opts.email,
+      archetype: opts.archetype as any,
+      customNote: opts.note,
+    });
+
+    console.log(pc.bold(`\n=== Generated Outreach [${result.archetype}] ===\n`));
+    console.log(pc.cyan('Subject: ') + pc.bold(result.subject));
+    console.log(pc.dim('Stats:   ') + `${result.wordCount} words · ${result.charCount} characters`);
+    console.log('\n' + pc.white(result.bodyText) + '\n');
+    console.log(pc.green('1-Click Gmail Web Compose URL:'));
+    console.log(pc.underline(pc.cyan(result.webComposeUrl)));
+    console.log('');
+  });
+
+program
+  .command('outreach:send')
+  .description('Send outreach email via Gmail SMTP (App Password) or Google API')
+  .requiredOption('-t, --to <email>', 'recipient email')
+  .requiredOption('-s, --subject <subject>', 'email subject')
+  .requiredOption('-b, --body <body>', 'email body text')
+  .option('-m, --mode <mode>', 'smtp | api | draft', 'smtp')
+  .option('--user <email>', 'Gmail address (defaults to GMAIL_USER env)')
+  .option('--pass <password>', 'Google App Password (defaults to GMAIL_APP_PASS env)')
+  .action(async (opts: {
+    to: string;
+    subject: string;
+    body: string;
+    mode: string;
+    user?: string;
+    pass?: string;
+  }) => {
+    const { sendGmailSmtp, sendGmailApi } = await import('@jobhunt/connectors');
+    console.log(pc.bold(`\nSending outreach to ${opts.to} via Gmail [${opts.mode.toUpperCase()}]...`));
+
+    if (opts.mode === 'smtp') {
+      const user = opts.user || process.env.GMAIL_USER || '';
+      const pass = opts.pass || process.env.GMAIL_APP_PASS || '';
+      if (!user || !pass) {
+        console.error(pc.red('Error: GMAIL_USER and GMAIL_APP_PASS must be provided or set in environment.'));
+        process.exit(1);
+      }
+      const res = await sendGmailSmtp({
+        user,
+        pass,
+        to: opts.to,
+        subject: opts.subject,
+        text: opts.body,
+      });
+      if (res.success) {
+        console.log(pc.green(`✓ Email sent successfully via Gmail SMTP! Message-ID: ${res.messageId}`));
+      } else {
+        console.error(pc.red(`✗ Send failed: ${res.error}`));
+      }
+    } else {
+      console.log(pc.yellow('For direct API/Draft sending, use web studio or configure OAuth tokens in config.'));
+    }
+  });
+
 // ------------------------------------------------------------------ util ----
 /** verify deliberately includes entries marked enabled: false */
 function loadRegistryAll(): CompanyEntry[] {
