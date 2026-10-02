@@ -1,0 +1,47 @@
+[
+  {
+    "id": "ac978161-6f46-4f6b-ad9e-a258e642751c",
+    "text": "Senior Software Engineer, Full Stack",
+    "hostedUrl": "https://jobs.lever.co/globex/ac978161",
+    "applyUrl": "https://jobs.lever.co/globex/ac978161/apply",
+    "createdAt": 1787317887459,
+    "categories": {
+      "commitment": "Full-time",
+      "department": "Engineering",
+      "location": "Bengaluru, India",
+      "team": "Platform",
+      "allLocations": [
+        "Bengaluru, India",
+        "Remote - India"
+      ]
+    },
+    "descriptionPlain": "We need a senior engineer comfortable across the stack.",
+    "description": "<p>We need a senior engineer comfortable across the stack.</p>",
+    "lists": [
+      {
+        "text": "What you'll need",
+        "content": "<li>5+ years with React, TypeScript and Node.js</li><li>Experience with PostgreSQL and REST API design</li><li>Docker, GitHub Actions, CI/CD</li><li>Nice to have: AWS Lambda, Terraform</li>"
+      }
+    ],
+    "workplaceType": "hybrid",
+    "country": "IN",
+    "additionalPlain": "Salary range 26 - 34 LPA depending on experience."
+  },
+  {
+    "id": "bb111111-2222-3333-4444-555566667777",
+    "text": "Senior Full Stack Engineer (React / Node.js)",
+    "hostedUrl": "https://jobs.lever.co/globex/bb111111",
+    "createdAt": 1787317887459,
+    "categories": {
+      "commitment": "Full-time",
+      "location": "Remote - India",
+      "team": "Platform",
+      "allLocations": [
+        "Remote - India"
+      ]
+    },
+    "descriptionPlain": "Duplicate of the Acme role, reposted by an agency on a different board. React, Redux, TypeScript, Node.js, GCP.",
+    "workplaceType": "remote",
+    "country": "IN"
+  }
+]

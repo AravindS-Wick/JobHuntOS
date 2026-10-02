@@ -1,0 +1,33 @@
+{
+  "jobs": [
+    {
+      "id": "8fb1615c-34bf-47c4-a1d1-b7b2f836bbd3",
+      "title": "Full Stack Engineer (Python + React)",
+      "department": "Engineering",
+      "team": "Product",
+      "employmentType": "FullTime",
+      "location": "Remote",
+      "secondaryLocations": [],
+      "publishedAt": "2026-08-24T04:38:15.322+00:00",
+      "isListed": true,
+      "isRemote": true,
+      "workplaceType": "Remote",
+      "jobUrl": "https://jobs.ashbyhq.com/initech/8fb1615c",
+      "applyUrl": "https://jobs.ashbyhq.com/initech/8fb1615c/application",
+      "descriptionPlain": "Build product surfaces with React and TypeScript, and services in Python/Flask. We run on GCP with Cloud Run and Pub/Sub. Testing with Jest. You will own REST API design. Familiarity with Docker required. Bonus: BigQuery.",
+      "descriptionHtml": "<p>Build product surfaces with React and TypeScript...</p>"
+    },
+    {
+      "id": "cc222222-1111-4444-8888-999900001111",
+      "title": "Engineering Manager, Platform",
+      "department": "Engineering",
+      "employmentType": "FullTime",
+      "location": "London, United Kingdom",
+      "publishedAt": "2026-08-18T04:38:15.322+00:00",
+      "isListed": true,
+      "workplaceType": "Onsite",
+      "jobUrl": "https://jobs.ashbyhq.com/initech/cc222222",
+      "descriptionPlain": "Lead a team of 8 engineers. People management focus."
+    }
+  ]
+}
