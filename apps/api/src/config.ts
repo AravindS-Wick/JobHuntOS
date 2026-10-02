@@ -18,6 +18,8 @@ const Env = z.object({
   REGISTRY_PATH: z.string().default('config/companies.yaml'),
 });
 
+const LOOPBACK = new Set(['127.0.0.1', 'localhost', '::1']);
+
 export type Config = z.infer<typeof Env> & { corsOrigins: string[] };
 
 export function loadConfig(source: NodeJS.ProcessEnv = process.env): Config {
@@ -25,6 +27,13 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): Config {
   if (!parsed.success) {
     const issues = parsed.error.issues.map((i) => `  ${i.path.join('.') || '(root)'}: ${i.message}`).join('\n');
     throw new Error(`Invalid environment configuration:\n${issues}`);
+  }
+  const { API_HOST, API_KEY, NODE_ENV } = parsed.data;
+  if (!API_KEY && (NODE_ENV === 'production' || !LOOPBACK.has(API_HOST))) {
+    throw new Error(
+      `Invalid environment configuration:
+  API_KEY: required when NODE_ENV=production or API_HOST is not loopback (got ${API_HOST})`,
+    );
   }
   return {
     ...parsed.data,

@@ -92,12 +92,12 @@ export const jobRoutes: FastifyPluginAsyncZod = async (app) => {
       summary: 'Ingest raw jobs from Chrome Extension or external scraper',
       description: 'Used by the Manifest V3 Chrome extension to ingest live LinkedIn / Naukri postings directly into the scoring pipeline.',
       body: z.object({
-        source: z.string().default('linkedin'),
+        source: z.enum(['linkedin', 'naukri', 'indeed']).default('linkedin'),
         jobs: z.array(z.object({
           sourceId: z.string().min(1),
           company: z.string().min(1),
           title: z.string().min(1),
-          url: z.string().min(1),
+          url: z.url(),
           locationRaw: z.string().optional(),
           descriptionText: z.string().default(''),
           compensationRaw: z.string().optional(),
@@ -117,16 +117,17 @@ export const jobRoutes: FastifyPluginAsyncZod = async (app) => {
     },
   }, async (req) => {
     const rawJobs = req.body.jobs.map((j) => ({
-      source: (req.body.source as any) || 'linkedin',
+      source: req.body.source,
       sourceId: j.sourceId,
       company: j.company,
       companySlug: j.company.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'company',
       title: j.title,
       url: j.url,
-      locationRaw: j.locationRaw ?? 'Remote - India',
+      // Unknown stays unknown: never invent a location (it feeds the location gate in scoring).
+      locationRaw: j.locationRaw ?? '',
       descriptionText: j.descriptionText,
       compensationRaw: j.compensationRaw,
-      postedAt: j.postedAt ?? new Date(),
+      postedAt: j.postedAt,
     }));
 
     return app.services.ingest.ingestBatch(rawJobs, 'agent');

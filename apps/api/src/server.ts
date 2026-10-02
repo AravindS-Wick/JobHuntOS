@@ -13,16 +13,20 @@ async function main() {
     const reachable = await pingDb(db);
     if (!reachable) throw new Error('Database unreachable');
     repos = createRepos(db);
-  } catch {
-    console.log('Postgres daemon not reachable on localhost:5433 — starting embedded PGlite (WASM Postgres)...');
+  } catch (err) {
+    // An in-memory fallback in production would silently lose data on restart.
+    if (config.NODE_ENV === 'production') throw err;
+    console.warn(
+      `Database unreachable (${err instanceof Error ? err.message : err}) — starting embedded PGlite. Data is NOT persisted.`,
+    );
     const { db, close } = await createTestDb();
     closeEmbeddedDb = close;
     repos = createRepos(db);
     try {
       await syncRegistry(repos, config.REGISTRY_PATH);
       console.log(`Synced target companies from ${config.REGISTRY_PATH} into embedded database.`);
-    } catch (e: any) {
-      console.warn('Could not sync registry:', e.message);
+    } catch (e) {
+      console.warn('Could not sync registry:', e instanceof Error ? e.message : e);
     }
   }
 

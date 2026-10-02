@@ -298,3 +298,43 @@ describe('inbox & connectors endpoints', () => {
   });
 });
 
+
+describe('config safety', () => {
+  it('refuses to bind a non-loopback host without an API key', () => {
+    expect(() => loadConfig({ API_HOST: '0.0.0.0' })).toThrow(/API_KEY/);
+  });
+  it('refuses production without an API key', () => {
+    expect(() => loadConfig({ NODE_ENV: 'production' })).toThrow(/API_KEY/);
+  });
+  it('allows loopback without a key in development', () => {
+    expect(() => loadConfig({})).not.toThrow();
+  });
+  it('allows a non-loopback host when a key is set', () => {
+    expect(() => loadConfig({ API_HOST: '0.0.0.0', API_KEY: API_KEY })).not.toThrow();
+  });
+});
+
+describe('POST /jobs/ingest-batch', () => {
+  const post = (payload: unknown) =>
+    app.inject({ method: 'POST', url: '/jobs/ingest-batch', headers: { 'x-api-key': API_KEY }, payload: payload as object });
+
+  it('rejects an unknown source and a non-URL url', async () => {
+    expect((await post({ source: 'bogus', jobs: [] })).statusCode).toBe(400);
+    const bad = await post({ source: 'linkedin', jobs: [{ sourceId: 'x', company: 'C', title: 'T', url: 'not-a-url' }] });
+    expect(bad.statusCode).toBe(400);
+  });
+
+  it('does not invent a location or a posted date when the scraper has none', async () => {
+    const res = await post({
+      source: 'linkedin',
+      jobs: [{ sourceId: 'nofacts-1', company: 'Mystery Co', title: 'Senior React Engineer', url: 'https://example.com/j/1' }],
+    });
+    expect(res.statusCode).toBe(200);
+    const list = await app.inject({ method: 'GET', url: '/jobs?limit=100', headers: { 'x-api-key': API_KEY } });
+    const job = (list.json().items as { sourceId: string; locationRaw: string | null; postedAt: string | null }[])
+      .find((j) => j.sourceId === 'nofacts-1');
+    expect(job).toBeDefined();
+    expect(job!.locationRaw ?? '').not.toContain('Remote - India');
+    expect(job!.postedAt).toBeNull();
+  });
+});
