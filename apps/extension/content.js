@@ -6,38 +6,26 @@
 (function () {
   console.log('[JobHunt OS] Content script injected on', window.location.hostname);
 
-  // Candidate Fact Table Cache (Strict truth table, never fabricate)
-  const CANDIDATE_FACTS = {
-    name: 'Aravindhan Sivaraman',
-    firstName: 'Aravindhan',
-    lastName: 'Sivaraman',
-    email: 'aravindhan.dev@gmail.com',
-    phone: '9876543210',
-    countryCode: '+91',
-    city: 'Chennai',
-    state: 'Tamil Nadu',
-    country: 'India',
-    yearsExperience: 5.5,
-    noticePeriodDays: 30,
-    currentSalaryLpa: 20,
-    expectedSalaryLpa: 28,
-  };
+  // Candidate facts come ONLY from the local API's profile. Nothing is hardcoded:
+  // a missing fact is left blank for the human to fill, never guessed.
+  const CANDIDATE_FACTS = {};
+  let profileLoaded = false;
 
-  // Sync latest candidate profile from local Fastify core if online
   try {
     chrome.runtime.sendMessage({ action: 'GET_CANDIDATE_PROFILE' }, (res) => {
-      if (res?.success && res.profile) {
-        const p = res.profile;
-        if (p.name) {
-          CANDIDATE_FACTS.name = p.name;
-          const parts = p.name.split(' ');
-          if (parts.length > 0) CANDIDATE_FACTS.firstName = parts[0];
-          if (parts.length > 1) CANDIDATE_FACTS.lastName = parts.slice(1).join(' ');
-        }
-        if (p.yearsExperience) CANDIDATE_FACTS.yearsExperience = p.yearsExperience;
-        if (p.homeCity) CANDIDATE_FACTS.city = p.homeCity;
-        if (p.minSalaryInrLpa) CANDIDATE_FACTS.expectedSalaryLpa = p.minSalaryInrLpa;
+      if (!res?.success || !res.profile) return;
+      const p = res.profile;
+      if (p.name) {
+        CANDIDATE_FACTS.name = p.name;
+        const parts = p.name.split(' ');
+        CANDIDATE_FACTS.firstName = parts[0];
+        if (parts.length > 1) CANDIDATE_FACTS.lastName = parts.slice(1).join(' ');
       }
+      if (p.email) CANDIDATE_FACTS.email = p.email;
+      if (p.phone) CANDIDATE_FACTS.phone = p.phone;
+      if (p.homeCity) CANDIDATE_FACTS.city = p.homeCity;
+      if (typeof p.yearsExperience === 'number') CANDIDATE_FACTS.yearsExperience = p.yearsExperience;
+      profileLoaded = true;
     });
   } catch (e) {
     // runtime disconnected or background asleep
@@ -169,52 +157,49 @@
       return;
     }
 
-    if (statusEl) statusEl.textContent = 'Injecting candidate profile facts into form fields...';
+    if (!profileLoaded) {
+      if (statusEl) statusEl.textContent = 'Profile not loaded from the local API - nothing was filled.';
+      return;
+    }
 
-    // Autofill text inputs
+    if (statusEl) statusEl.textContent = 'Filling fields from your profile...';
+
+    const setValue = (input, value) => {
+      input.value = String(value);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+
+    // Only unambiguous fields. Skill-specific questions ("years of React / Kubernetes")
+    // are never answered here: they are left for the human, per the no-fabrication rule.
     const inputs = modal.querySelectorAll('input, select, textarea');
     let filledCount = 0;
 
     inputs.forEach((input) => {
+      if (input.value) return; // never overwrite what the user typed
       const name = (input.getAttribute('name') || '').toLowerCase();
       const id = (input.id || '').toLowerCase();
-      const label = input.closest('label')?.textContent?.toLowerCase() || '';
+      const label = (input.closest('label')?.textContent || '').toLowerCase();
+      const key = `${name} ${id} ${label}`;
 
-      const matchKey = `${name} ${id} ${label}`;
-
-      if (matchKey.includes('phone') || matchKey.includes('mobile')) {
-        input.value = CANDIDATE_FACTS.phone;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        filledCount++;
-      } else if (matchKey.includes('email')) {
-        input.value = CANDIDATE_FACTS.email;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        filledCount++;
-      } else if (matchKey.includes('first name')) {
-        input.value = CANDIDATE_FACTS.firstName;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        filledCount++;
-      } else if (matchKey.includes('last name')) {
-        input.value = CANDIDATE_FACTS.lastName;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        filledCount++;
-      } else if (matchKey.includes('city') || matchKey.includes('location')) {
-        input.value = CANDIDATE_FACTS.city;
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        filledCount++;
-      } else if (matchKey.includes('experience') || matchKey.includes('years')) {
-        input.value = String(CANDIDATE_FACTS.yearsExperience);
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        filledCount++;
-      } else if (matchKey.includes('notice')) {
-        input.value = String(CANDIDATE_FACTS.noticePeriodDays);
-        input.dispatchEvent(new Event('input', { bubbles: true }));
-        filledCount++;
+      const rules = [
+        [/phone|mobile/, 'phone'],
+        [/e-?mail/, 'email'],
+        [/first name/, 'firstName'],
+        [/last name|surname/, 'lastName'],
+        [/city/, 'city'],
+        [/(total|overall).*(experience|years)|(experience|years).*(total|overall)/, 'yearsExperience'],
+      ];
+      for (const [re, fact] of rules) {
+        if (re.test(key) && CANDIDATE_FACTS[fact] !== undefined) {
+          setValue(input, CANDIDATE_FACTS[fact]);
+          filledCount++;
+          return;
+        }
       }
     });
 
     if (statusEl) {
-      statusEl.textContent = `✅ Auto-filled ${filledCount} fields with zero fabrication!`;
+      statusEl.textContent = `Filled ${filledCount} field(s) from your profile. Review everything before submitting.`;
       statusEl.style.color = '#10B981';
     }
   }

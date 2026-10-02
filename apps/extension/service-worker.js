@@ -42,6 +42,9 @@ async function getHeaders() {
 
 // Listen for messages from content scripts and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  // Only this extension's own scripts may talk to the worker.
+  if (sender.id !== chrome.runtime.id) return false;
+
   if (request.action === 'CHECK_HEALTH') {
     checkApiHealth().then((ok) => sendResponse({ ok, baseUrl: API_BASE_URL }));
     return true;
@@ -57,7 +60,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       })
         .then((res) => res.json())
         .then((data) => {
-          console.log('[JobHunt OS] Ingested batch result:', data);
           sendResponse({ success: true, data });
         })
         .catch((err) => {
@@ -74,13 +76,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         .then((res) => res.json())
         .then((data) => sendResponse({ success: true, profile: data }))
         .catch((err) => sendResponse({ success: false, error: err.message }));
-    });
-    return true;
-  }
-
-  if (request.action === 'GET_COOKIES') {
-    chrome.cookies.get({ url: 'https://www.linkedin.com', name: 'li_at' }, (cookie) => {
-      sendResponse({ li_at: cookie?.value || null });
     });
     return true;
   }
