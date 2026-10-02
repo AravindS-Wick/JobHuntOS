@@ -1,0 +1,51 @@
+
+> jobhunt-os@0.1.0 cli C:\Users\Aravindhan\AppData\Local\Temp\mf\wt
+> tsx apps/cli/src/index.ts "demo"
+
+
+  running on bundled fixtures (no network)
+
+TIER 1  — apply today, with outreach  (3 found, showing 3)
+──────────────────────────────────────────────────────────────────────────────
+   87  Senior Full Stack Engineer (React / Node.js)
+       Acme Cloud · Remote - India · remote · ~33 LPA eq · 40d ago
+       match  react, redux, typescript, node, rest api, api design, jest, docker, ci/cd, gcp
+       gaps   kubernetes, graphql  (flag these honestly — never claim them)
+       https://boards.greenhouse.io/acme/jobs/8077887
+
+   77  Senior Software Engineer, Full Stack
+       Globex · Bengaluru, India / Remote - India · hybrid · ~30 LPA eq · 42d ago
+       match  react, typescript, node, rest api, api design, docker, github actions, ci/cd, postgresql
+       gaps   aws, lambda, terraform  (flag these honestly — never claim them)
+       https://jobs.lever.co/globex/ac978161
+
+   77  Full Stack Engineer (Python + React)
+       Initech · Remote · remote · undisclosed · 39d ago
+       match  react, typescript, python, flask, rest api, api design, jest, docker, gcp, cloud run
+       gaps   bigquery  (flag these honestly — never claim them)
+       ghost? open 39 days; very thin description
+       https://jobs.ashbyhq.com/initech/8fb1615c
+
+
+TIER 2  — apply if time permits  (0 found, showing 0)
+──────────────────────────────────────────────────────────────────────────────
+  nothing here today
+
+TIER 3  — worth a look  (0 found, showing 0)
+──────────────────────────────────────────────────────────────────────────────
+  nothing here today
+
+TIER 4 — 4 filtered out
+   25  Staff Backend Engineer, Java & Kafka @ Acme Cloud — wrong stack (0 profile matches, 6 gap technologies)
+   25  Junior Frontend Developer @ Acme Cloud — seniority below target
+   24  Talent Community — Engineering (General Application) @ Acme Cloud — low score
+   13  Engineering Manager, Platform @ Initech — onsite/hybrid outside acceptable cities
+
+SUMMARY
+──────────────────────────────────────────────────────────────────────────────
+  companies polled   3
+  postings fetched   8
+  after dedup        7  (1 duplicates collapsed)
+  tier 1 / 2 / 3     3 / 0 / 0
+  elapsed            0.0s
+

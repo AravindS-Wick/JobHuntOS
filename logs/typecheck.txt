@@ -1,0 +1,4 @@
+
+> jobhunt-os@0.1.0 typecheck C:\Users\Aravindhan\AppData\Local\Temp\mf\wt
+> tsc --noEmit
+

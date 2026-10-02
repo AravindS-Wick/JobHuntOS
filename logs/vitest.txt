@@ -1,0 +1,19 @@
+
+> jobhunt-os@0.1.0 test C:\Users\Aravindhan\AppData\Local\Temp\mf\wt
+> vitest run
+
+The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.
+
+ RUN  v2.1.9 C:/Users/Aravindhan/AppData/Local/Temp/mf/wt
+
+ ✓ packages/core/src/core.test.ts (38 tests) 22ms
+ ✓ packages/connectors/src/connectors.test.ts (24 tests) 47ms
+ ✓ packages/db/src/db.test.ts (13 tests) 3169ms
+ ✓ packages/services/src/services.test.ts (12 tests) 3335ms
+ ✓ apps/api/src/api.test.ts (34 tests) 2689ms
+
+ Test Files  5 passed (5)
+      Tests  121 passed (121)
+   Start at  15:32:35
+   Duration  5.85s (transform 945ms, setup 0ms, collect 4.95s, tests 9.26s, environment 1ms, prepare 840ms)
+
