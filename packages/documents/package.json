@@ -1,0 +1,14 @@
+{
+  "name": "@jobhunt/documents",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@jobhunt/core": "workspace:*",
+    "docx": "^9.8.1",
+    "mammoth": "^1.13.0",
+    "playwright-core": "^1.63.0",
+    "unpdf": "^1.8.1"
+  }
+}
