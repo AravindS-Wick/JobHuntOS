@@ -1,5 +1,12 @@
-export type AtsType = 'greenhouse' | 'lever' | 'ashby' | 'workday' | 'smartrecruiters' | 'unknown';
-export type SourceType = AtsType | 'naukri' | 'linkedin' | 'indeed' | 'foundit' | 'manual';
+export type AtsType =
+  | 'greenhouse' | 'lever' | 'ashby' | 'workday' | 'smartrecruiters' | 'zohorecruit' | 'unknown';
+
+/** Keyword-searchable sources: job boards and big-company careers sites. */
+export type BoardId =
+  | 'linkedin' | 'naukri' | 'indeed' | 'foundit' | 'instahyre' | 'cutshort' | 'wellfound'
+  | 'glassdoor' | 'yc' | 'hn' | 'remoteok' | 'amazon' | 'microsoft' | 'google';
+
+export type SourceType = AtsType | BoardId | 'manual';
 export type WorkMode = 'remote' | 'hybrid' | 'onsite' | 'unknown';
 export type Seniority = 'intern' | 'junior' | 'mid' | 'senior' | 'staff' | 'lead' | 'manager' | 'unknown';
 export type Tier = 1 | 2 | 3 | 4;

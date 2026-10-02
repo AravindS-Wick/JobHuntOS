@@ -115,8 +115,8 @@ export function inferSeniority(title: string, description = ''): Seniority {
   return 'unknown';
 }
 
-const LPA_RE = /(?:₹|rs\.?|inr)?\s*(\d{1,3}(?:\.\d{1,2})?)\s*(?:-|–|to)\s*(\d{1,3}(?:\.\d{1,2})?)\s*(?:lpa|lakhs?\s*(?:per\s*annum|p\.?a\.?)?|l\s*p\s*a)/i;
-const LPA_SINGLE_RE = /(?:₹|rs\.?|inr)\s*(\d{1,3}(?:\.\d{1,2})?)\s*(?:lpa|lakhs?)/i;
+const LPA_RE = /(?:₹|rs\.?|inr)?\s*(\d{1,3}(?:\.\d{1,2})?)\s*(?:-|–|to)\s*(\d{1,3}(?:\.\d{1,2})?)\s*(?:lpa|(?:lakhs?|lacs?)\s*(?:per\s*annum|p\.?\s*a\.?)?|l\s*p\s*a)/i;
+const LPA_SINGLE_RE = /(?:₹|rs\.?|inr)\s*(\d{1,3}(?:\.\d{1,2})?)\s*(?:lpa|lakhs?|lacs?)/i;
 const USD_RE = /\$\s?(\d{2,3}),?(\d{3})\s*(?:-|–|to)\s*\$?\s?(\d{2,3}),?(\d{3})/;
 
 const USD_TO_INR = 88; // rough; used only to rank, never to quote

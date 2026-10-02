@@ -13,8 +13,10 @@ function jaccard(a: Set<string>, b: Set<string>): number {
 
 /** Source preference when collapsing duplicates: the company's own board wins. */
 const SOURCE_RANK: Record<string, number> = {
-  greenhouse: 0, lever: 0, ashby: 0, workday: 1, smartrecruiters: 1,
-  linkedin: 2, naukri: 2, indeed: 3, foundit: 4, manual: 5, unknown: 6,
+  greenhouse: 0, lever: 0, ashby: 0, workday: 1, smartrecruiters: 1, zohorecruit: 1,
+  amazon: 0, microsoft: 0, google: 0,
+  linkedin: 2, naukri: 2, instahyre: 2, cutshort: 2, wellfound: 2, yc: 2,
+  indeed: 3, glassdoor: 3, foundit: 3, hn: 4, remoteok: 4, manual: 5, unknown: 6,
 };
 
 export interface DedupResult {
