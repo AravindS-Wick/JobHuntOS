@@ -32,6 +32,9 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Typecheck web console
+        run: pnpm --filter @jobhunt/web exec tsc --noEmit
+
       - name: Run Test Suite
         run: pnpm test
 
