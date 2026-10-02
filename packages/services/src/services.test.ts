@@ -164,6 +164,10 @@ describe('inboxService', () => {
     expect(draft.draftBody).toContain('Aravindhan Sivaraman');
     expect(draft.draftBody).toContain('Acme Cloud');
     expect(draft.actionCategory).toBe('interview_invite');
+    // Draft replies must never carry contact details or claims that are not in PROFILE.
+    expect(draft.draftBody).not.toMatch(/\+?\d[\d\s-]{8,}\d/);
+    expect(draft.draftBody).not.toContain('linkedin.com/in/');
+    expect(draft.draftBody).toContain('[add your availability]');
   });
 });
 

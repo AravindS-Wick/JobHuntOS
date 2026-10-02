@@ -121,7 +121,7 @@ export function inboxService(repos: Repos) {
       }
 
       const profile = await profiles.resolve();
-      const candidateName = profile.name || 'Aravindhan Sivaraman';
+      const candidateName = profile.name;
       const cleanSubject = msg.subject.startsWith('Re:') ? msg.subject : `Re: ${msg.subject}`;
       const to = msg.sender;
       const category = msg.category as EmailCategory;
@@ -134,15 +134,14 @@ export function inboxService(repos: Repos) {
 
 Thank you so much for the invitation to speak with the engineering team.
 
-I am very excited about the opportunity at ${msg.companyMentioned || 'your company'} and look forward to our discussion. I am generally available weekdays between 10:00 AM – 6:00 PM IST${
-            msg.interviewUrl ? ` and have accessed the scheduling link (${msg.interviewUrl})` : ''
+I am very excited about the opportunity at ${msg.companyMentioned || 'your company'} and look forward to our discussion. My availability: [add your availability]${
+            msg.interviewUrl ? `. I have the scheduling link (${msg.interviewUrl})` : ''
           }.
 
 Please let me know if you need any additional details from my side prior to our meeting.
 
 Best regards,
-${candidateName}
-+91 98842 12345 | Chennai, India`;
+${candidateName}`;
           break;
 
         case 'assessment_link':
@@ -150,7 +149,7 @@ ${candidateName}
 
 Thank you for sharing the technical assessment details.
 
-I have received the link${msg.assessmentUrl ? ` (${msg.assessmentUrl})` : ''} and will complete the challenge well within the specified deadline.
+I have received the link${msg.assessmentUrl ? ` (${msg.assessmentUrl})` : ''} and will review the details.
 
 Thanks again for coordinating this step.
 
@@ -163,13 +162,12 @@ ${candidateName}`;
 
 Thank you for reaching out regarding the ${msg.jobTitleMentioned || 'engineering'} opportunity at ${msg.companyMentioned || 'your organization'}.
 
-My background centers around building high-scale distributed systems, React, Node.js, and TypeScript web architectures. I would love to learn more about the team's roadmap, the core technical challenges, and the role's scope.
+My background is in React, Node.js and TypeScript. I would love to learn more about the team's roadmap, the core technical challenges, and the role's scope.
 
 Would you be open to a brief introductory call this week?
 
 Best regards,
-${candidateName}
-LinkedIn: https://linkedin.com/in/aravindhan-sivaraman`;
+${candidateName}`;
           break;
 
         case 'offer':
@@ -188,7 +186,7 @@ ${candidateName}`;
 
 Thank you for following up and letting me know. I really enjoyed learning more about ${msg.companyMentioned || 'your company'} and the team's mission.
 
-I would love to stay in touch for future opportunities where my background in full-stack architecture and engineering leadership might be a good fit.
+I would love to stay in touch for future opportunities where my full-stack background might be a good fit.
 
 Wishing you and the team all the best.
 
