@@ -1,0 +1,59 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "lib": [
+      "ES2023"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": [
+      "node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@jobhunt/core": [
+        "packages/core/src/index.ts"
+      ],
+      "@jobhunt/core/*": [
+        "packages/core/src/*"
+      ],
+      "@jobhunt/connectors": [
+        "packages/connectors/src/index.ts"
+      ],
+      "@jobhunt/connectors/*": [
+        "packages/connectors/src/*"
+      ],
+      "@jobhunt/db": [
+        "packages/db/src/index.ts"
+      ],
+      "@jobhunt/db/*": [
+        "packages/db/src/*"
+      ],
+      "@jobhunt/services": [
+        "packages/services/src/index.ts"
+      ],
+      "@jobhunt/services/*": [
+        "packages/services/src/*"
+      ],
+      "@jobhunt/contracts": [
+        "packages/contracts/src/index.ts"
+      ],
+      "@jobhunt/contracts/*": [
+        "packages/contracts/src/*"
+      ],
+      "@jobhunt/api-client": [
+        "packages/api-client/src/index.ts"
+      ]
+    }
+  },
+  "include": [
+    "packages/**/*.ts",
+    "apps/**/*.ts",
+    "*.ts"
+  ]
+}
