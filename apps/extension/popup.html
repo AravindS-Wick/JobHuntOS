@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobHunt OS Copilot</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 16px;
+      width: 300px;
+      background: #070a12;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #1e293b;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+    }
+    .title {
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .status-pill {
+      font-size: 10px;
+      font-family: monospace;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .card {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+      font-size: 11px;
+    }
+    .quota-bar {
+      height: 6px;
+      background: #1e293b;
+      border-radius: 3px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+    .quota-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #10b981);
+      width: 33%;
+    }
+    .btn {
+      width: 100%;
+      padding: 9px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      margin-bottom: 8px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #06b6d4);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      filter: brightness(1.1);
+    }
+    .btn-outline {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+    }
+    .btn-outline:hover {
+      background: #334155;
+    }
+    .footer-link {
+      display: block;
+      text-align: center;
+      font-size: 11px;
+      color: #818cf8;
+      text-decoration: none;
+      margin-top: 8px;
+    }
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">
+      <img src="icons/icon-32.png" width="20" height="20" style="border-radius: 4px;" alt="Logo" />
+      <span>JobHunt OS</span>
+    </div>
+    <span id="backend-status" class="status-pill">CHECKING...</span>
+  </div>
+
+  <div class="card">
+    <div style="display: flex; justify-content: space-between; font-weight: 600;">
+      <span>LinkedIn Daily Quota</span>
+      <span style="color: #10b981; font-family: monospace;">4 / 12 Apps</span>
+    </div>
+    <div class="quota-bar">
+      <div class="quota-fill"></div>
+    </div>
+    <div style="color: #64748b; font-size: 10px; margin-top: 6px; font-family: monospace;">
+      Gaussian delay: μ=4.5s (0 Flags)
+    </div>
+  </div>
+
+  <button id="btn-sync-active" class="btn btn-primary">
+    ⚡ Sync Jobs on Active Tab
+  </button>
+  <button id="btn-open-console" class="btn btn-outline">
+    🚀 Open Full Web Cockpit (:3000)
+  </button>
+
+  <a href="http://localhost:3000" target="_blank" class="footer-link">
+    Open Decision Cockpit &rarr;
+  </a>
+
+  <script src="popup.js"></script>
+</body>
+</html>
